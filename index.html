@@ -1,0 +1,870 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent;font-size:13px}
+.app{display:flex;flex-direction:column;min-height:780px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)}
+.depbar{display:flex;align-items:center;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);padding:0 14px;min-height:44px;overflow-x:auto}
+.depbar-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-tertiary);margin-right:10px;white-space:nowrap;flex-shrink:0}
+.dep-tab{display:flex;align-items:center;gap:6px;padding:0 13px;height:44px;cursor:pointer;font-size:12px;color:var(--color-text-secondary);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.dep-tab:hover{color:var(--color-text-primary);background:var(--color-background-primary)}
+.dep-tab.active{color:var(--color-text-primary);font-weight:500;border-bottom-color:#E8A020}
+.dep-tab .ds{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dep-tab .ddel{display:none;font-size:11px;color:var(--color-text-tertiary);margin-left:3px}
+.dep-tab:hover .ddel{display:inline}
+.dep-add{display:flex;align-items:center;gap:4px;padding:0 10px;height:44px;cursor:pointer;font-size:12px;color:var(--color-text-tertiary);transition:all .15s;flex-shrink:0}
+.dep-add:hover{color:var(--color-text-secondary)}
+.depbar-right{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:6px}
+.lang-toggle{display:flex;border:0.5px solid var(--color-border-secondary);border-radius:6px;overflow:hidden;flex-shrink:0}
+.lang-btn{padding:4px 10px;font-size:11px;font-weight:500;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);border:none;transition:all .15s}
+.lang-btn.active{background:#E8A020;color:#fff}
+.body{display:flex;flex:1;min-height:0}
+.sidebar{width:188px;flex-shrink:0;background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column}
+.sidebar-logo{padding:13px 14px 9px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.logo{font-size:13px;font-weight:500;color:var(--color-text-primary)}.logo span{color:#E8A020}
+.dep-badge{margin-top:5px;font-size:10px;color:var(--color-text-secondary);background:var(--color-background-tertiary);border:0.5px solid var(--color-border-tertiary);border-radius:4px;padding:2px 7px;display:inline-block;font-family:var(--font-mono)}
+.nav{flex:1;padding:6px 0}
+.nav-section{padding:9px 14px 3px;font-size:10px;font-weight:500;letter-spacing:.08em;color:var(--color-text-tertiary);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:12px;color:var(--color-text-secondary);border-left:2px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--color-background-primary);color:var(--color-text-primary)}
+.nav-item.active{color:var(--color-text-primary);font-weight:500;border-left-color:#E8A020;background:var(--color-background-primary)}
+.nav-item i{font-size:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:500;padding:1px 5px;border-radius:10px;background:#FCEBEB;color:#A32D2D}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{padding:10px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.page-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.page-sub{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
+.topbar-actions{display:flex;gap:6px;align-items:center}
+.content{flex:1;padding:15px;overflow-y:auto}
+.panel{display:none}.panel.active{display:block}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:10px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.06em}
+.f input,.f select,.f textarea{font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:6px;padding:5px 8px;background:var(--color-background-primary);color:var(--color-text-primary);width:100%;font-family:inherit}
+.f textarea{resize:vertical;min-height:52px}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:#E8A020;box-shadow:0 0 0 2px rgba(232,160,32,.1)}
+.fg{display:grid;gap:9px;margin-bottom:9px}
+.fg2{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr 1fr 1fr}.fg1{grid-template-columns:1fr}
+.sec{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);margin:15px 0 7px;padding-bottom:5px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.sec:first-child{margin-top:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--color-background-tertiary)}
+.btn.primary{background:#E8A020;border-color:#E8A020;color:#fff}.btn.primary:hover{background:#F5B840}
+.btn.ai{background:linear-gradient(135deg,#2D1B69,#185FA5);border-color:transparent;color:#fff}
+.btn.slack{background:#4A154B;border-color:transparent;color:#fff}.btn.slack:hover{background:#611f64}
+.tw{overflow-x:auto;border:0.5px solid var(--color-border-tertiary);border-radius:8px;margin-top:7px}
+table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+th{background:var(--color-background-secondary);padding:6px 7px;text-align:left;font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);white-space:nowrap}
+td{padding:6px 7px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.ar{display:flex;align-items:center;gap:5px;padding:6px 8px;font-size:11px;color:var(--color-text-secondary);cursor:pointer;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);transition:all .15s;border-radius:0 0 8px 8px}
+.ar:hover{color:var(--color-text-primary)}
+.ie{border:none;background:transparent;font-size:11px;color:var(--color-text-primary);width:100%;font-family:inherit;padding:0}
+.ie:focus{outline:1px solid #E8A020;border-radius:3px;background:var(--color-background-secondary);padding:1px 3px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:13px}
+.stat{background:var(--color-background-secondary);border-radius:8px;padding:9px 11px}
+.stat .v{font-size:20px;font-weight:500;font-family:var(--font-mono)}
+.stat .l{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+.ms-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.ms-row:last-child{border-bottom:none}
+.chk{width:17px;height:17px;border-radius:50%;border:1.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s}
+.chk.done{background:#3B6D11;border-color:#3B6D11;color:#fff}
+.rl{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:18px;border-radius:4px;font-size:10px;font-weight:500;padding:0 3px}
+.rh{background:#FCEBEB;color:#A32D2D}.rm{background:#FAEEDA;color:#854F0B}.rl2{background:#EAF3DE;color:#3B6D11}
+.eblk{background:var(--color-background-secondary);border-radius:7px;padding:10px;margin-bottom:9px}
+.eblk-t{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:7px}
+.rc{border-radius:7px;padding:10px;border:0.5px solid var(--color-border-tertiary)}
+.rc h4{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.rc.good{border-top:2px solid #3B6D11}.rc.good h4{color:#3B6D11}
+.rc.bad{border-top:2px solid #A32D2D}.rc.bad h4{color:#A32D2D}
+.rc.act{border-top:2px solid #E8A020}.rc.act h4{color:#854F0B}
+.ri{display:flex;align-items:flex-start;gap:5px;margin-bottom:5px;font-size:11px}
+.radd{display:flex;gap:5px;margin-top:6px}
+.radd input{flex:1;font-size:11px;padding:4px 7px;border:0.5px solid var(--color-border-secondary);border-radius:5px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:inherit}
+.radd button{padding:3px 8px;border-radius:5px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:11px;cursor:pointer;color:var(--color-text-secondary)}
+.radd button:hover{color:var(--color-text-primary)}
+.slack-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:7px;margin-top:13px}
+.slack-bar-info{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--color-text-secondary)}
+.slack-ch{font-weight:500;color:var(--color-text-primary)}
+.ai-panel{position:absolute;top:0;right:0;bottom:0;width:295px;background:var(--color-background-primary);border-left:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;z-index:10;transform:translateX(100%);transition:transform .22s ease}
+.ai-panel.open{transform:translateX(0)}
+.main{position:relative;overflow:hidden}
+.ai-hdr{padding:11px 12px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+.ai-spark{width:19px;height:19px;border-radius:5px;background:linear-gradient(135deg,#2D1B69,#185FA5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px}
+.ai-msgs{flex:1;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:8px}
+.ai-msg{border-radius:7px;padding:8px 10px;font-size:11px;line-height:1.6}
+.ai-msg.u{background:var(--color-background-secondary);color:var(--color-text-secondary);border-radius:7px 7px 2px 7px}
+.ai-msg.a{background:rgba(24,95,165,.06);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);border-radius:2px 7px 7px 7px}
+.ai-quick{padding:7px 11px;border-top:0.5px solid var(--color-border-tertiary)}
+.ai-ql{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:5px}
+.ai-qbs{display:flex;flex-wrap:wrap;gap:4px}
+.ai-qb{padding:3px 7px;border-radius:20px;font-size:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.ai-qb:hover{color:var(--color-text-primary)}
+.ai-inp-row{padding:8px 11px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:6px}
+.ai-inp{flex:1;font-size:11px;padding:6px 8px;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:inherit}
+.ai-inp:focus{outline:none;border-color:#185FA5}
+.cw{flex:1;display:flex;flex-direction:column;min-width:0;transition:margin-right .22s ease}
+.cw.ai-open{margin-right:295px}
+.toast{position:fixed;bottom:18px;right:18px;background:#4A154B;color:#fff;padding:8px 14px;border-radius:7px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:7px;z-index:100;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.modal-wrap{display:none;position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:50;align-items:center;justify-content:center;min-height:400px}
+.modal-wrap.show{display:flex}
+.modal-card{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:20px;width:360px;max-width:90%}
+.modal-title{font-size:14px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+</style>
+
+<h2 class="sr-only">Valtec PM Toolkit — Multi-deployment, bilingual (EN/ZH)</h2>
+
+<div class="app">
+  <div class="depbar" id="depbar">
+    <span class="depbar-label" data-i18n="depLabel">Deployments</span>
+    <div id="dep-tabs"></div>
+    <div class="dep-add" onclick="showModal()"><i class="ti ti-plus" style="font-size:14px" aria-hidden="true"></i> <span data-i18n="newDep">New</span></div>
+    <div class="depbar-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">中文</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo">VALTEC <span>PM</span></div>
+        <div class="dep-badge" id="dep-badge">—</div>
+      </div>
+      <div class="nav">
+        <div class="nav-section" data-i18n="navTools">Tools</div>
+        <div class="nav-item active" onclick="switchTool('charter',this)"><i class="ti ti-file-description" aria-hidden="true"></i> <span data-i18n="toolCharter">Charter</span></div>
+        <div class="nav-item" onclick="switchTool('tracker',this)"><i class="ti ti-checkbox" aria-hidden="true"></i> <span data-i18n="toolTracker">Tracker</span> <span class="nav-badge" id="badge-delayed" style="display:none">!</span></div>
+        <div class="nav-item" onclick="switchTool('eod',this)"><i class="ti ti-report" aria-hidden="true"></i> <span data-i18n="toolEod">EOD Report</span></div>
+        <div class="nav-item" onclick="switchTool('risk',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <span data-i18n="toolRisk">Risk Log</span> <span class="nav-badge" id="badge-risk" style="display:none">!</span></div>
+        <div class="nav-item" onclick="switchTool('retro',this)"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="toolRetro">Retrospective</span></div>
+      </div>
+    </div>
+
+    <div class="main" id="main-area">
+      <div class="cw" id="cw">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="page-title">Charter</div>
+            <div class="page-sub" id="page-sub"></div>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn ai" onclick="toggleAI()"><i class="ti ti-sparkles" aria-hidden="true"></i> AI</button>
+            <button class="btn slack" onclick="slackSend()"><i class="ti ti-brand-slack" aria-hidden="true"></i> Slack</button>
+            <button class="btn primary" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i> <span data-i18n="export">Export</span></button>
+          </div>
+        </div>
+
+        <div class="content">
+
+          <!-- CHARTER -->
+          <div class="panel active" id="panel-charter">
+            <div class="sec" data-i18n="charterInfo">Project Info</div>
+            <div class="fg fg2">
+              <div class="f"><label data-i18n="fName">Project Name</label><input data-field="name" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fId">Project ID</label><input data-field="id" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fClient">Client</label><input data-field="client" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fVessel">Vessel</label><input data-field="vessel" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fLocation">Location</label><input data-field="location" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fPm">Project Manager</label><input data-field="pm" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fStart">Start Date</label><input type="date" data-field="start" oninput="syncField(this)"></div>
+              <div class="f"><label data-i18n="fEnd">End Date</label><input type="date" data-field="end" oninput="syncField(this)"></div>
+            </div>
+            <div class="fg fg1">
+              <div class="f"><label data-i18n="fGoal">Objective</label><textarea data-field="goal" oninput="syncField(this)"></textarea></div>
+              <div class="f"><label data-i18n="fSuccess">Success Criteria (one per line)</label><textarea data-field="success" oninput="syncField(this)"></textarea></div>
+            </div>
+            <div class="sec" data-i18n="milestones">Milestones</div>
+            <div id="ms-list"></div>
+            <div class="ar" onclick="addMs()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addMs">Add milestone</span></div>
+            <div class="slack-bar">
+              <div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackKickoff">Kick-off notice</span> → <span class="slack-ch">#project-management</span></div>
+              <button class="btn slack" onclick="slackSend('charter')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button>
+            </div>
+          </div>
+
+          <!-- TRACKER -->
+          <div class="panel" id="panel-tracker">
+            <div class="stats">
+              <div class="stat"><div class="v" id="t-total">0</div><div class="l" data-i18n="total">Total</div></div>
+              <div class="stat"><div class="v" id="t-done" style="color:#3B6D11">0</div><div class="l" data-i18n="done">Done</div></div>
+              <div class="stat"><div class="v" id="t-inprog" style="color:#854F0B">0</div><div class="l" data-i18n="inprog">In Progress</div></div>
+              <div class="stat"><div class="v" id="t-delayed" style="color:#A32D2D">0</div><div class="l" data-i18n="delayed">Delayed</div></div>
+            </div>
+            <div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:28px"><col><col style="width:70px"><col style="width:90px"><col style="width:72px"><col style="width:80px"></colgroup>
+              <thead><tr><th>#</th><th data-i18n="thCommitment">Commitment</th><th data-i18n="thOwner">Owner</th><th data-i18n="thDue">Due Date</th><th data-i18n="thStatus">Status</th><th data-i18n="thNote">Note</th></tr></thead>
+              <tbody id="tracker-body"></tbody>
+            </table><div class="ar" onclick="addTrackerRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
+            <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackTracker">Tracker summary</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="slackSend('tracker')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+          </div>
+
+          <!-- EOD -->
+          <div class="panel" id="panel-eod">
+            <div class="fg fg3" style="margin-bottom:12px">
+              <div class="f"><label data-i18n="eodDate">Report Date</label><input type="date" id="eod-date"></div>
+              <div class="f"><label data-i18n="eodReporter">Reporter</label><input id="eod-reporter"></div>
+              <div class="f"><label data-i18n="eodWeather">Weather</label><input id="eod-weather"></div>
+            </div>
+            <div class="eblk"><div class="eblk-t" data-i18n="eodDone">Completed Today</div><div id="eod-done-list"></div>
+              <div style="display:flex;gap:6px;margin-top:6px"><input id="eod-done-in" style="flex:1;font-size:11px;padding:4px 7px;border:0.5px solid var(--color-border-secondary);border-radius:5px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:inherit" onkeydown="if(event.key==='Enter')addEodItem('done')"><button class="btn" style="padding:4px 8px" onclick="addEodItem('done')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
+            </div>
+            <div class="eblk"><div class="eblk-t" data-i18n="eodPlan">Planned for Tomorrow</div><div id="eod-plan-list"></div>
+              <div style="display:flex;gap:6px;margin-top:6px"><input id="eod-plan-in" style="flex:1;font-size:11px;padding:4px 7px;border:0.5px solid var(--color-border-secondary);border-radius:5px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:inherit" onkeydown="if(event.key==='Enter')addEodItem('plan')"><button class="btn" style="padding:4px 8px" onclick="addEodItem('plan')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
+            </div>
+            <div class="sec" data-i18n="eodIssues">Issues & Blockers</div>
+            <div class="tw"><table style="table-layout:fixed"><colgroup><col><col style="width:42px"><col><col style="width:58px"></colgroup>
+              <thead><tr><th data-i18n="thDesc">Description</th><th data-i18n="thSev">Sev.</th><th data-i18n="thAction">Action</th><th data-i18n="thStatus">Status</th></tr></thead>
+              <tbody id="eod-issue-body"></tbody>
+            </table><div class="ar" onclick="addEodIssue()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
+            <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackEod">EOD Report</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="slackSend('eod')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+          </div>
+
+          <!-- RISK -->
+          <div class="panel" id="panel-risk">
+            <div class="sec" data-i18n="riskReg">Risk Register</div>
+            <div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:28px"><col><col style="width:50px"><col style="width:36px"><col style="width:36px"><col style="width:28px"><col><col style="width:55px"><col style="width:55px"></colgroup>
+              <thead><tr><th>#</th><th data-i18n="thRiskDesc">Risk</th><th data-i18n="thCat">Category</th><th data-i18n="thProb">Prob.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thScore">Score</th><th data-i18n="thMit">Mitigation</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
+              <tbody id="risk-body"></tbody>
+            </table><div class="ar" onclick="addRiskRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRisk">Add risk</span></div></div>
+            <div class="sec" style="margin-top:14px" data-i18n="issueLog">Issue Log</div>
+            <div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:28px"><col><col style="width:80px"><col style="width:36px"><col><col><col style="width:55px"><col style="width:55px"></colgroup>
+              <thead><tr><th>#</th><th data-i18n="thDesc">Description</th><th data-i18n="thDate">Date Found</th><th data-i18n="thSev">Sev.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thAction">Action</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
+              <tbody id="issue-body"></tbody>
+            </table><div class="ar" onclick="addIssueRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addIssue">Add issue</span></div></div>
+            <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackRisk">Risk summary</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="slackSend('risk')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+          </div>
+
+          <!-- RETRO -->
+          <div class="panel" id="panel-retro">
+            <div class="fg fg3" style="margin-bottom:12px">
+              <div class="f"><label data-i18n="fId">Project ID</label><input id="retro-proj"></div>
+              <div class="f"><label data-i18n="retroDate">Retro Date</label><input type="date" id="retro-date"></div>
+              <div class="f"><label data-i18n="retroResult">Outcome</label>
+                <select id="retro-result">
+                  <option data-i18n="retroFull" value="Full">Full delivery</option>
+                  <option data-i18n="retroPartial" value="Partial">Partial delivery</option>
+                  <option data-i18n="retroMiss" value="Miss">Not delivered</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+              <div class="rc good"><h4><i class="ti ti-thumb-up" aria-hidden="true"></i> <span data-i18n="retroGood">What went well</span></h4><div id="retro-good"></div><div class="radd"><input id="r-good-in" onkeydown="if(event.key==='Enter')addRetro('good')"><button onclick="addRetro('good')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
+              <div class="rc bad"><h4><i class="ti ti-thumb-down" aria-hidden="true"></i> <span data-i18n="retroBad">Needs improvement</span></h4><div id="retro-bad"></div><div class="radd"><input id="r-bad-in" onkeydown="if(event.key==='Enter')addRetro('bad')"><button onclick="addRetro('bad')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
+              <div class="rc act"><h4><i class="ti ti-bolt" aria-hidden="true"></i> <span data-i18n="retroAct">Action items</span></h4><div id="retro-action"></div><div class="radd"><input id="r-action-in" onkeydown="if(event.key==='Enter')addRetro('action')"><button onclick="addRetro('action')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
+            </div>
+            <div class="sec" style="margin-top:14px" data-i18n="closure">Closure Checklist</div>
+            <div id="closure-list">
+              <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl1" style="font-size:12px"></div></div>
+              <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl2" style="font-size:12px"></div></div>
+              <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl3" style="font-size:12px"></div></div>
+              <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl4" style="font-size:12px"></div></div>
+              <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl5" style="font-size:12px"></div></div>
+            </div>
+            <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackRetro">Retrospective summary</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="slackSend('retro')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Panel -->
+      <div class="ai-panel" id="ai-panel">
+        <div class="ai-hdr">
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500"><div class="ai-spark"><i class="ti ti-sparkles" style="font-size:10px" aria-hidden="true"></i></div> AI Agent</div>
+          <i class="ti ti-x" style="font-size:15px;cursor:pointer;color:var(--color-text-secondary)" onclick="toggleAI()" aria-label="Close"></i>
+        </div>
+        <div class="ai-msgs" id="ai-msgs"><div class="ai-msg a" id="ai-welcome"></div></div>
+        <div class="ai-quick"><div class="ai-ql" data-i18n="quickCmds">Quick commands</div><div class="ai-qbs" id="ai-qbs"></div></div>
+        <div class="ai-inp-row"><input class="ai-inp" id="ai-inp" onkeydown="if(event.key==='Enter')sendAI()"><button class="btn ai" style="padding:5px 9px" onclick="sendAI()"><i class="ti ti-send" aria-hidden="true"></i></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Dep Modal -->
+  <div class="modal-wrap" id="ndm">
+    <div class="modal-card">
+      <div class="modal-title"><span data-i18n="newDepTitle">New Deployment</span> <i class="ti ti-x" style="cursor:pointer;color:var(--color-text-secondary);font-size:15px" onclick="hideModal()" aria-label="Close"></i></div>
+      <div class="fg fg2" style="margin-bottom:12px">
+        <div class="f"><label data-i18n="fId">Project ID</label><input id="ndm-id"></div>
+        <div class="f"><label data-i18n="fClient">Client</label><input id="ndm-client"></div>
+        <div class="f"><label data-i18n="fVessel">Vessel</label><input id="ndm-vessel"></div>
+        <div class="f"><label data-i18n="fLocation">Location</label><input id="ndm-location"></div>
+      </div>
+      <div class="fg fg1" style="margin-bottom:14px">
+        <div class="f"><label data-i18n="depStatus">Status</label>
+          <select id="ndm-status">
+            <option value="planning" data-i18n="stPlanning">Planning</option>
+            <option value="active" data-i18n="stActive">Active</option>
+            <option value="done" data-i18n="stDone">Done</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="hideModal()" data-i18n="cancel">Cancel</button>
+        <button class="btn primary" onclick="createDep()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="create">Create</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-brand-slack" aria-hidden="true"></i><span id="toast-msg"></span></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+<script>
+const T = {
+  en: {
+    depLabel:'Deployments', newDep:'New', navTools:'Tools',
+    toolCharter:'Charter', toolTracker:'Tracker', toolEod:'EOD Report', toolRisk:'Risk Log', toolRetro:'Retrospective',
+    export:'Export', send:'Send', addRow:'Add', cancel:'Cancel', create:'Create',
+    charterInfo:'Project Info', milestones:'Milestones', addMs:'Add milestone',
+    fName:'Project Name', fId:'Project ID', fClient:'Client', fVessel:'Vessel', fLocation:'Location',
+    fPm:'Project Manager', fStart:'Start Date', fEnd:'End Date', fGoal:'Objective', fSuccess:'Success Criteria (one per line)',
+    total:'Total', done:'Done', inprog:'In Progress', delayed:'Delayed',
+    thCommitment:'Commitment', thOwner:'Owner', thDue:'Due Date', thStatus:'Status', thNote:'Note',
+    thDesc:'Description', thSev:'Sev.', thAction:'Action', thCat:'Category',
+    thProb:'Prob.', thImpact:'Impact', thScore:'Score', thMit:'Mitigation', thDate:'Date Found', thRiskDesc:'Risk',
+    eodDate:'Report Date', eodReporter:'Reporter', eodWeather:'Weather',
+    eodDone:'Completed Today', eodPlan:'Planned for Tomorrow', eodIssues:'Issues & Blockers',
+    riskReg:'Risk Register', issueLog:'Issue Log', addRisk:'Add risk', addIssue:'Add issue',
+    retroDate:'Retro Date', retroResult:'Outcome', retroGood:'What went well',
+    retroBad:'Needs improvement', retroAct:'Action items', closure:'Closure Checklist',
+    retroFull:'Full delivery', retroPartial:'Partial delivery', retroMiss:'Not delivered',
+    newDepTitle:'New Deployment', depStatus:'Status',
+    stPlanning:'Planning', stActive:'Active', stDone:'Done',
+    slackKickoff:'Kick-off notice', slackTracker:'Tracker summary', slackEod:'EOD Report',
+    slackRisk:'Risk summary', slackRetro:'Retrospective summary',
+    quickCmds:'Quick commands',
+    cl1:'All deliverables signed off', cl2:'Equipment inventoried & logged',
+    cl3:'Flight records archived', cl4:'Client training docs handed over', cl5:'Lessons learned updated to SOP',
+    msStatus:['Pending','In Progress','Done','Delayed'],
+    tStatus:['Pending','In Progress','Done','Delayed','Cancelled'],
+    rStatus:['Open','Monitoring','Closed'],
+    iStatus:['Open','In Progress','Closed'],
+    sevOpts:['P1','P2','P3','P4'],
+    pageInfo:{
+      charter:{title:'Charter',sub:'Project definition — scope, milestones, stakeholders'},
+      tracker:{title:'Commitment Tracker',sub:'Track all commitments and ownership'},
+      eod:{title:'EOD Report',sub:'Daily close-out — completed, planned, issues'},
+      risk:{title:'Risk & Issue Log',sub:'Risk register + issue log'},
+      retro:{title:'Retrospective',sub:'Project review — wins, improvements, actions'},
+    },
+    aiWelcome:'AI Agent ready. Switch deployments and all five tools stay in sync.',
+    aiPlaceholder:'Ask AI…',
+    quick:{
+      charter:['Generate ClickUp tasks','Draft kick-off email','Assess milestone risks'],
+      tracker:['Analyse delayed items','Suggest priorities','Draft Slack summary'],
+      eod:['Draft client update','Analyse today\'s issues','Generate EOD Slack'],
+      risk:['Deep risk analysis','Top risk mitigation plan','Generate risk alert'],
+      retro:['Summarise lessons learned','Generate action items','Draft closure report'],
+    },
+    toastSent:'Sent to #project-management',
+    alertNoId:'Please enter a Project ID.',
+    alertDup:'This ID already exists.',
+    alertMin:'At least one deployment must remain.',
+    alertConfirmDel:(id)=>`Delete ${id}?`,
+    alertExport:'Export supported for Tracker and Risk Log only.',
+  },
+  zh: {
+    depLabel:'部署專案', newDep:'新增', navTools:'工具',
+    toolCharter:'Charter', toolTracker:'Tracker', toolEod:'EOD 報告', toolRisk:'風險紀錄', toolRetro:'回顧',
+    export:'匯出', send:'發送', addRow:'新增', cancel:'取消', create:'建立',
+    charterInfo:'專案基本資訊', milestones:'里程碑', addMs:'新增里程碑',
+    fName:'專案名稱', fId:'專案編號', fClient:'客戶', fVessel:'船隻', fLocation:'作業地點',
+    fPm:'專案經理', fStart:'起始日', fEnd:'結束日', fGoal:'主要目標', fSuccess:'成功標準（每行一條）',
+    total:'總計', done:'完成', inprog:'進行中', delayed:'延遲',
+    thCommitment:'承諾事項', thOwner:'負責人', thDue:'截止日', thStatus:'狀態', thNote:'備註',
+    thDesc:'描述', thSev:'嚴重度', thAction:'應對措施', thCat:'類別',
+    thProb:'機率', thImpact:'影響', thScore:'分數', thMit:'應對措施', thDate:'發現日期', thRiskDesc:'風險描述',
+    eodDate:'報告日期', eodReporter:'回報人', eodWeather:'天候',
+    eodDone:'今日完成', eodPlan:'明日計畫', eodIssues:'問題 & 障礙',
+    riskReg:'風險登錄', issueLog:'問題登錄', addRisk:'新增風險', addIssue:'新增問題',
+    retroDate:'回顧日期', retroResult:'最終結果', retroGood:'做得好',
+    retroBad:'需改進', retroAct:'Action Items', closure:'結案 Checklist',
+    retroFull:'全數達成', retroPartial:'部分達成', retroMiss:'未達成',
+    newDepTitle:'新增 Deployment', depStatus:'狀態',
+    stPlanning:'規劃中', stActive:'進行中', stDone:'已完成',
+    slackKickoff:'Kick-off 通知', slackTracker:'Tracker 摘要', slackEod:'EOD 報告',
+    slackRisk:'風險摘要', slackRetro:'回顧摘要',
+    quickCmds:'快速指令',
+    cl1:'交付物清單已全部 Sign-off', cl2:'所有設備已盤點 & 紀錄',
+    cl3:'飛行紀錄已存檔', cl4:'客戶培訓文件已移交', cl5:'Lessons Learned 已更新至 SOP',
+    msStatus:['待開始','進行中','完成','延遲'],
+    tStatus:['待處理','進行中','完成','延遲','取消'],
+    rStatus:['開啟','監控中','關閉'],
+    iStatus:['開啟','處理中','關閉'],
+    sevOpts:['P1','P2','P3','P4'],
+    pageInfo:{
+      charter:{title:'Charter',sub:'啟案文件 — 定義範疇、里程碑、利害關係人'},
+      tracker:{title:'Commitment Tracker',sub:'承諾事項追蹤'},
+      eod:{title:'EOD 報告',sub:'每日結案報告'},
+      risk:{title:'風險 & 問題紀錄',sub:'風險登錄 + 問題登錄'},
+      retro:{title:'回顧',sub:'專案回顧'},
+    },
+    aiWelcome:'AI Agent 已就緒。切換 Deployment 時，五個工具資料全部同步。',
+    aiPlaceholder:'問 AI…',
+    quick:{
+      charter:['產生 ClickUp 任務','起草 Kick-off 信件','評估里程碑風險'],
+      tracker:['分析延遲項目','建議優先順序','產生 Slack 摘要'],
+      eod:['起草客戶更新信','分析今日問題','產生 EOD Slack'],
+      risk:['深度風險分析','建議應對策略','產生風險警示'],
+      retro:['歸納 Lessons Learned','產生 Action Items','起草結案摘要'],
+    },
+    toastSent:'已發送至 #project-management',
+    alertNoId:'請填寫專案編號。',
+    alertDup:'此編號已存在。',
+    alertMin:'至少保留一個 Deployment。',
+    alertConfirmDel:(id)=>`確定刪除 ${id}？`,
+    alertExport:'目前支援 Tracker 和 Risk Log 匯出。',
+  }
+};
+
+let lang = 'en';
+let deps = {}, currentDep = null, currentTool = 'charter', aiOpen = false;
+let riskCount = 0, issueCount = 0;
+
+const STATUS_COLOR = {planning:'#E8A020', active:'#3B6D11', done:'#888780'};
+
+function t(key){ return T[lang][key] || T['en'][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-zh').classList.toggle('active', l==='zh');
+  applyI18n();
+  updatePageInfo();
+  renderQuickBtns();
+  document.getElementById('ai-inp').placeholder = t('aiPlaceholder');
+  document.getElementById('ai-welcome').textContent = t('aiWelcome');
+  if(currentDep) renderDynamic();
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-val]').forEach(el => {
+    el.value = t(el.dataset.i18nVal);
+  });
+}
+
+function updatePageInfo() {
+  const info = t('pageInfo')[currentTool] || {title: currentTool, sub:''};
+  document.getElementById('page-title').textContent = info.title;
+  document.getElementById('page-sub').textContent = info.sub;
+}
+
+function renderDynamic() {
+  renderMilestones(deps[currentDep].milestones);
+  renderTracker(deps[currentDep].tracker);
+  renderRisks(deps[currentDep].risks);
+  renderIssues(deps[currentDep].issues);
+}
+
+function newDepData(id, client, vessel, location, status) {
+  return {
+    id, client, vessel, location, status,
+    charter: {name:'', id, client, vessel, location, pm:'', start:'', end:'', goal:'', success:''},
+    milestones: [
+      {name:'T-30', date:'', sIdx:0, done:false},
+      {name:'T-14', date:'', sIdx:0, done:false},
+      {name:'T-0', date:'', sIdx:0, done:false},
+      {name:'Installation & flight test', date:'', sIdx:0, done:false},
+      {name:'Sign-off', date:'', sIdx:0, done:false},
+    ],
+    tracker: [],
+    eod: {date:new Date().toISOString().slice(0,10), reporter:'', weather:'', done:[], plan:[], issues:[]},
+    risks: [
+      {desc:'Vessel schedule change', cat:'Logistics', prob:'H', impact:'H', score:9, mit:'Reconfirm T-7; flexible departure', owner:'PM', sIdx:0},
+      {desc:'Equipment customs hold', cat:'Logistics', prob:'M', impact:'H', score:6, mit:'Prepare import documents early', owner:'PM', sIdx:0},
+    ],
+    issues: [],
+    retro: {proj:id, date:new Date().toISOString().slice(0,10), rIdx:0, good:[], bad:[], actions:[]},
+  };
+}
+
+function createDep() {
+  const id = document.getElementById('ndm-id').value.trim();
+  if(!id){alert(t('alertNoId'));return;}
+  if(deps[id]){alert(t('alertDup'));return;}
+  const d = newDepData(id,
+    document.getElementById('ndm-client').value.trim(),
+    document.getElementById('ndm-vessel').value.trim(),
+    document.getElementById('ndm-location').value.trim(),
+    document.getElementById('ndm-status').value
+  );
+  deps[id] = d; hideModal(); renderDepTabs(); switchDep(id);
+}
+
+function renderDepTabs() {
+  const c = document.getElementById('dep-tabs');
+  c.innerHTML = Object.keys(deps).map(id => {
+    const d = deps[id]; const act = id===currentDep?'active':'';
+    return `<div class="dep-tab ${act}" onclick="switchDep('${id}')">
+      <span class="ds" style="background:${STATUS_COLOR[d.status]}"></span>
+      <span>${id}</span>
+      <span style="font-size:10px;color:var(--color-text-tertiary);margin-left:2px">${d.client?'· '+d.client.slice(0,10):''}</span>
+      <span class="ddel" onclick="event.stopPropagation();deleteDep('${id}')" title="Delete"><i class="ti ti-x" aria-hidden="true"></i></span>
+    </div>`;
+  }).join('');
+}
+
+function switchDep(id) {
+  if(currentDep) saveCurrent();
+  currentDep = id; renderDepTabs(); loadDep(id);
+  document.getElementById('dep-badge').textContent = id;
+}
+
+function deleteDep(id) {
+  if(Object.keys(deps).length<=1){alert(t('alertMin'));return;}
+  if(!confirm(t('alertConfirmDel')(id))) return;
+  delete deps[id];
+  if(currentDep===id){const first=Object.keys(deps)[0]; currentDep=null; switchDep(first);}
+  renderDepTabs();
+}
+
+function saveCurrent() {
+  if(!currentDep||!deps[currentDep]) return;
+  const d = deps[currentDep];
+  ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
+    const el=document.querySelector(`[data-field="${f}"]`); if(el) d.charter[f]=el.value;
+  });
+  d.milestones = [...document.querySelectorAll('#ms-list .ms-row')].map(r=>({
+    name:r.querySelector('input.ie')?.value||'',
+    date:r.querySelectorAll('input')[1]?.value||'',
+    sIdx:r.querySelector('select')?t('msStatus').indexOf(r.querySelector('select').value):0,
+    done:r.querySelector('.chk')?.classList.contains('done')||false,
+  }));
+  d.tracker = [...document.querySelectorAll('#tracker-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input,select');
+    return{item:ins[0]?.value||'',owner:ins[1]?.value||'',due:ins[2]?.value||'',sIdx:t('tStatus').indexOf(ins[3]?.value)||0,note:ins[4]?.value||''};
+  });
+  const g=id=>{const el=document.getElementById(id);return el?el.value:''};
+  d.eod.date=g('eod-date');d.eod.reporter=g('eod-reporter');d.eod.weather=g('eod-weather');
+  d.eod.done=[...document.querySelectorAll('#eod-done-list .eod-txt')].map(s=>s.textContent);
+  d.eod.plan=[...document.querySelectorAll('#eod-plan-list .eod-txt')].map(s=>s.textContent);
+  d.eod.issues=[...document.querySelectorAll('#eod-issue-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input,select');
+    return{desc:ins[0]?.value||'',sevIdx:t('sevOpts').indexOf(ins[1]?.value)||2,action:ins[2]?.value||'',statusIdx:t('iStatus').indexOf(ins[3]?.value)||0};
+  });
+  d.risks=[...document.querySelectorAll('#risk-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input'); const sels=tr.querySelectorAll('select'); const badge=tr.querySelector('.rl');
+    return{desc:ins[0]?.value||'',cat:ins[1]?.value||'',prob:sels[0]?.value||'H',impact:sels[1]?.value||'H',score:parseInt(badge?.textContent||'9'),mit:ins[2]?.value||'',owner:ins[3]?.value||'',sIdx:t('rStatus').indexOf(sels[2]?.value)||0};
+  });
+  d.issues=[...document.querySelectorAll('#issue-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input,select');
+    return{desc:ins[0]?.value||'',date:ins[1]?.value||'',sevIdx:t('sevOpts').indexOf(ins[2]?.value)||2,impact:ins[3]?.value||'',action:ins[4]?.value||'',owner:ins[5]?.value||'',statusIdx:t('iStatus').indexOf(ins[6]?.value)||0};
+  });
+  d.retro.proj=g('retro-proj');d.retro.date=g('retro-date');
+  d.retro.rIdx=['Full','Partial','Miss'].indexOf(document.getElementById('retro-result')?.value)||0;
+  d.retro.good=[...document.querySelectorAll('#retro-good .ri span')].map(s=>s.textContent);
+  d.retro.bad=[...document.querySelectorAll('#retro-bad .ri span')].map(s=>s.textContent);
+  d.retro.actions=[...document.querySelectorAll('#retro-action .ri span')].map(s=>s.textContent);
+}
+
+function loadDep(id) {
+  const d=deps[id];
+  ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
+    const el=document.querySelector(`[data-field="${f}"]`); if(el) el.value=d.charter[f]||'';
+  });
+  renderMilestones(d.milestones);
+  renderTracker(d.tracker);
+  document.getElementById('eod-date').value=d.eod.date;
+  document.getElementById('eod-reporter').value=d.eod.reporter;
+  document.getElementById('eod-weather').value=d.eod.weather;
+  renderEodList('done',d.eod.done);
+  renderEodList('plan',d.eod.plan);
+  renderEodIssues(d.eod.issues);
+  renderRisks(d.risks);
+  renderIssues(d.issues);
+  document.getElementById('retro-proj').value=d.retro.proj;
+  document.getElementById('retro-date').value=d.retro.date;
+  const rSel=document.getElementById('retro-result');
+  if(rSel) rSel.value=['Full','Partial','Miss'][d.retro.rIdx||0]||'Full';
+  renderRetroCol('good',d.retro.good);
+  renderRetroCol('bad',d.retro.bad);
+  renderRetroCol('action',d.retro.actions);
+  updateTrackerStats(); updateRiskBadge();
+}
+
+function syncField(el){if(!currentDep)return;deps[currentDep].charter[el.dataset.field]=el.value;}
+
+function msStatusOpts(cur){return t('msStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function tStatusOpts(cur){return t('tStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function rStatusOpts(cur){return t('rStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function iStatusOpts(cur){return t('iStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function sevOpts(cur){return t('sevOpts').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+
+function renderMilestones(mss){
+  document.getElementById('ms-list').innerHTML=mss.map(m=>`
+    <div class="ms-row">
+      <div class="chk${m.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div>
+      <div style="flex:1"><input class="ie" value="${m.name||''}" style="font-size:12px;font-weight:500"></div>
+      <input class="ie" type="date" value="${m.date||''}" style="font-size:10px;color:var(--color-text-secondary);width:110px;font-family:var(--font-mono)">
+      <select class="ie" style="font-size:10px;color:var(--color-text-secondary);width:65px">${msStatusOpts(m.sIdx||0)}</select>
+    </div>`).join('');
+}
+
+function renderTracker(rows){
+  document.getElementById('tracker-body').innerHTML=rows.map((r,i)=>`
+    <tr><td style="font-family:var(--font-mono);color:var(--color-text-secondary);font-size:10px">${String(i+1).padStart(2,'0')}</td>
+    <td><input class="ie" value="${r.item||''}"></td><td><input class="ie" value="${r.owner||''}"></td>
+    <td><input class="ie" type="date" value="${r.due||''}" style="font-family:var(--font-mono);font-size:10px"></td>
+    <td><select class="ie" onchange="updateTrackerStats()">${tStatusOpts(r.sIdx||0)}</select></td>
+    <td><input class="ie" value="${r.note||''}"></td></tr>`).join('');
+  updateTrackerStats();
+}
+
+function renderEodList(type,items){
+  document.getElementById(`eod-${type}-list`).innerHTML=items.map(v=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px">
+      <div class="chk" style="width:14px;height:14px" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:8px" aria-hidden="true"></i></div>
+      <span class="eod-txt" style="flex:1">${v}</span>
+      <i class="ti ti-x" style="font-size:11px;cursor:pointer;color:var(--color-text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i>
+    </div>`).join('');
+}
+
+function renderEodIssues(issues){
+  document.getElementById('eod-issue-body').innerHTML=issues.map(r=>`
+    <tr><td><input class="ie" value="${r.desc||''}"></td>
+    <td><select class="ie">${sevOpts(r.sevIdx||2)}</select></td>
+    <td><input class="ie" value="${r.action||''}"></td>
+    <td><select class="ie">${iStatusOpts(r.statusIdx||0)}</select></td></tr>`).join('');
+}
+
+function renderRisks(risks){
+  riskCount=risks.length;
+  document.getElementById('risk-body').innerHTML=risks.map((r,i)=>{
+    const sc=r.score||9; const cls=sc>=6?'rh':sc>=3?'rm':'rl2';
+    return `<tr><td style="font-family:var(--font-mono);color:var(--color-text-secondary);font-size:10px">R${String(i+1).padStart(2,'0')}</td>
+    <td><input class="ie" value="${r.desc||''}"></td><td><input class="ie" value="${r.cat||''}"></td>
+    <td><select class="ie" onchange="calcRisk(this)"><option${r.prob==='H'?' selected':''}>H</option><option${r.prob==='M'?' selected':''}>M</option><option${r.prob==='L'?' selected':''}>L</option></select></td>
+    <td><select class="ie" onchange="calcRisk(this)"><option${r.impact==='H'?' selected':''}>H</option><option${r.impact==='M'?' selected':''}>M</option><option${r.impact==='L'?' selected':''}>L</option></select></td>
+    <td><span class="rl ${cls}">${sc}</span></td>
+    <td><input class="ie" value="${r.mit||''}"></td><td><input class="ie" value="${r.owner||''}"></td>
+    <td><select class="ie">${rStatusOpts(r.sIdx||0)}</select></td></tr>`;
+  }).join('');
+  updateRiskBadge();
+}
+
+function renderIssues(issues){
+  issueCount=issues.length;
+  document.getElementById('issue-body').innerHTML=issues.map((r,i)=>`
+    <tr><td style="font-family:var(--font-mono);color:var(--color-text-secondary);font-size:10px">I${String(i+1).padStart(2,'0')}</td>
+    <td><input class="ie" value="${r.desc||''}"></td>
+    <td><input class="ie" type="date" value="${r.date||''}" style="font-family:var(--font-mono);font-size:10px"></td>
+    <td><select class="ie">${sevOpts(r.sevIdx||2)}</select></td>
+    <td><input class="ie" value="${r.impact||''}"></td><td><input class="ie" value="${r.action||''}"></td>
+    <td><input class="ie" value="${r.owner||''}"></td>
+    <td><select class="ie">${iStatusOpts(r.statusIdx||0)}</select></td></tr>`).join('');
+}
+
+function renderRetroCol(type,items){
+  const m={good:'retro-good',bad:'retro-bad',action:'retro-action'};
+  document.getElementById(m[type]).innerHTML=items.map(v=>`
+    <div class="ri"><i class="ti ti-circle-dot" style="font-size:10px;flex-shrink:0;margin-top:2px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+    <span style="flex:1">${v}</span>
+    <i class="ti ti-x" style="font-size:10px;cursor:pointer;color:var(--color-text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i></div>`).join('');
+}
+
+function updateTrackerStats(){
+  const rows=document.querySelectorAll('#tracker-body tr');
+  let dn=0,ip=0,dl=0;
+  rows.forEach(r=>{const s=r.querySelector('select');if(!s)return;
+    const v=s.value; const ds=t('tStatus');
+    if(v===ds[2])dn++;else if(v===ds[1])ip++;else if(v===ds[3])dl++;
+  });
+  document.getElementById('t-total').textContent=rows.length;
+  document.getElementById('t-done').textContent=dn;
+  document.getElementById('t-inprog').textContent=ip;
+  document.getElementById('t-delayed').textContent=dl;
+  const b=document.getElementById('badge-delayed');
+  b.style.display=dl>0?'inline':'none'; b.textContent=dl;
+}
+
+function updateRiskBadge(){
+  const high=[...document.querySelectorAll('#risk-body .rl')].filter(b=>parseInt(b.textContent)>=6).length;
+  const b=document.getElementById('badge-risk');
+  b.style.display=high>0?'inline':'none'; b.textContent=high;
+}
+
+function calcRisk(sel){
+  const tr=sel.closest('tr'); const sels=tr.querySelectorAll('select');
+  const m={H:3,M:2,L:1}; const score=(m[sels[0].value]||3)*(m[sels[1].value]||3);
+  const badge=tr.querySelector('.rl'); if(!badge)return;
+  badge.textContent=score; badge.className='rl '+(score>=6?'rh':score>=3?'rm':'rl2');
+  updateRiskBadge();
+}
+
+function toggleChk(el){el.classList.toggle('done');}
+
+function addMs(){
+  const d=document.createElement('div'); d.className='ms-row';
+  d.innerHTML=`<div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" style="font-size:12px;font-weight:500"></div><input class="ie" type="date" style="font-size:10px;color:var(--color-text-secondary);width:110px;font-family:var(--font-mono)"><select class="ie" style="font-size:10px;color:var(--color-text-secondary);width:65px">${msStatusOpts(0)}</select>`;
+  document.getElementById('ms-list').appendChild(d);
+}
+
+function addTrackerRow(){
+  const n=document.querySelectorAll('#tracker-body tr').length+1;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:var(--font-mono);color:var(--color-text-secondary);font-size:10px">${String(n).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie"></td><td><input class="ie" type="date" style="font-family:var(--font-mono);font-size:10px"></td><td><select class="ie" onchange="updateTrackerStats()">${tStatusOpts(0)}</select></td><td><input class="ie"></td>`;
+  document.getElementById('tracker-body').appendChild(tr); updateTrackerStats();
+}
+
+function addEodItem(type){
+  const inp=document.getElementById(`eod-${type}-in`); const val=inp.value.trim(); if(!val)return;
+  const list=document.getElementById(`eod-${type}-list`);
+  const div=document.createElement('div');
+  div.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px';
+  div.innerHTML=`<div class="chk" style="width:14px;height:14px" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:8px" aria-hidden="true"></i></div><span class="eod-txt" style="flex:1">${val}</span><i class="ti ti-x" style="font-size:11px;cursor:pointer;color:var(--color-text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
+  list.appendChild(div); inp.value='';
+}
+
+function addEodIssue(){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="ie"></td><td><select class="ie">${sevOpts(2)}</select></td><td><input class="ie"></td><td><select class="ie">${iStatusOpts(0)}</select></td>`;
+  document.getElementById('eod-issue-body').appendChild(tr);
+}
+
+function addRiskRow(){
+  riskCount++;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:var(--font-mono);color:var(--color-text-secondary);font-size:10px">R${String(riskCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><select class="ie" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><span class="rl rh">9</span></td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie">${rStatusOpts(0)}</select></td>`;
+  document.getElementById('risk-body').appendChild(tr); updateRiskBadge();
+}
+
+function addIssueRow(){
+  issueCount++;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:var(--font-mono);color:var(--color-text-secondary);font-size:10px">I${String(issueCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie" type="date" value="${new Date().toISOString().slice(0,10)}" style="font-family:var(--font-mono);font-size:10px"></td><td><select class="ie">${sevOpts(2)}</select></td><td><input class="ie"></td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie">${iStatusOpts(0)}</select></td>`;
+  document.getElementById('issue-body').appendChild(tr);
+}
+
+function addRetro(type){
+  const m={good:'r-good-in',bad:'r-bad-in',action:'r-action-in'};
+  const inp=document.getElementById(m[type]); const val=inp.value.trim(); if(!val)return;
+  const lm={good:'retro-good',bad:'retro-bad',action:'retro-action'};
+  const div=document.createElement('div'); div.className='ri';
+  div.innerHTML=`<i class="ti ti-circle-dot" style="font-size:10px;flex-shrink:0;margin-top:2px;color:var(--color-text-tertiary)" aria-hidden="true"></i><span style="flex:1">${val}</span><i class="ti ti-x" style="font-size:10px;cursor:pointer;color:var(--color-text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
+  document.getElementById(lm[type]).appendChild(div); inp.value='';
+}
+
+function switchTool(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active'); currentTool=id;
+  updatePageInfo(); renderQuickBtns();
+}
+
+function renderQuickBtns(){
+  const cmds=t('quick')[currentTool]||[];
+  document.getElementById('ai-qbs').innerHTML=cmds.map(c=>`<div class="ai-qb" onclick="sendAI('${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
+}
+
+function toggleAI(){
+  aiOpen=!aiOpen;
+  document.getElementById('ai-panel').classList.toggle('open',aiOpen);
+  document.getElementById('cw').classList.toggle('ai-open',aiOpen);
+  if(aiOpen) renderQuickBtns();
+}
+
+function showToast(msg){
+  const t2=document.getElementById('toast'); document.getElementById('toast-msg').textContent=msg;
+  t2.classList.add('show'); setTimeout(()=>t2.classList.remove('show'),3000);
+}
+
+function showModal(){document.getElementById('ndm').classList.add('show');}
+function hideModal(){
+  document.getElementById('ndm').classList.remove('show');
+  ['ndm-id','ndm-client','ndm-vessel','ndm-location'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ndm-status').value='planning';
+}
+
+function buildSlackMsg(tool){
+  if(!currentDep) return '';
+  saveCurrent(); const d=deps[currentDep]; const today=new Date().toLocaleDateString();
+  if(tool==='charter'){
+    const ms=d.milestones.map(m=>`${m.done?'✅':'⬜'} ${m.name} — ${t('msStatus')[m.sIdx||0]}`).join('\n');
+    return `📋 *Charter — ${d.charter.name||d.id}*\nClient: ${d.charter.client||'—'} | Vessel: ${d.charter.vessel||'—'} | PM: ${d.charter.pm||'—'}\n\n*Objective:*\n${d.charter.goal||'—'}\n\n*Milestones:*\n${ms}\n\n_Valtec PM Toolkit · ${today}_`;
+  }
+  if(tool==='tracker'){
+    const rows=d.tracker; const dl=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[3]);
+    let body=`✅ ${rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[2]).length}  🔄 ${rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[1]).length}  ⚠️ ${dl.length}  Total ${rows.length}`;
+    if(dl.length){body+='\n\n*Delayed:*\n'+dl.map(r=>`• ${r.item} — ${r.owner}`).join('\n');}
+    return `✅ *Tracker — ${d.id}* _(${today})_\n\n${body}\n\n_Valtec PM Toolkit_`;
+  }
+  if(tool==='eod'){
+    return `📋 *EOD — ${d.id}* | ${d.eod.date} | ${d.eod.reporter||'—'}\n\n*✅ Done:*\n${d.eod.done.map(v=>`• ${v}`).join('\n')||'—'}\n\n*📅 Tomorrow:*\n${d.eod.plan.map(v=>`• ${v}`).join('\n')||'—'}\n\n*⚠️ Issues:*\n${d.eod.issues.length?d.eod.issues.map(r=>`• [${t('sevOpts')[r.sevIdx||2]}] ${r.desc}`).join('\n'):'None'}\n\n_Valtec PM Toolkit_`;
+  }
+  if(tool==='risk'){
+    return `⚠️ *Risk Log — ${d.id}* _(${today})_\n\n${d.risks.map(r=>`${r.score>=6?'🔴':r.score>=3?'🟡':'🟢'} *${r.desc}* (${r.prob}×${r.impact}=${r.score})`).join('\n')||'No risks'}\n\n_Valtec PM Toolkit_`;
+  }
+  if(tool==='retro'){
+    const outcomes=['Full delivery','Partial delivery','Not delivered'];
+    return `🔁 *Retro — ${d.retro.proj||d.id}*\nOutcome: *${outcomes[d.retro.rIdx||0]}*\n\n*👍:*\n${d.retro.good.map(v=>`• ${v}`).join('\n')||'—'}\n\n*👎:*\n${d.retro.bad.map(v=>`• ${v}`).join('\n')||'—'}\n\n*⚡ Actions:*\n${d.retro.actions.map(v=>`• ${v}`).join('\n')||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
+  }
+  return '';
+}
+
+function slackSend(tool){
+  const tk=tool||currentTool;
+  const msg=buildSlackMsg(tk); if(!msg) return;
+  sendPrompt(`請用 Slack MCP 工具把以下訊息發送到頻道 ID C0BA2KNLDCY，不要修改內容：\n\n${msg}`);
+  showToast(t('toastSent'));
+}
+
+async function sendAI(msg){
+  const inp=document.getElementById('ai-inp');
+  const text=msg||inp.value.trim(); if(!text)return;
+  inp.value=''; if(!aiOpen) toggleAI();
+  addAIMsg('u',text);
+  const ld=addAIMsg('a',lang==='zh'?'分析中…':'Thinking…');
+  ld.style.fontStyle='italic'; ld.style.color='var(--color-text-tertiary)';
+  saveCurrent();
+  const ctx={dep:currentDep,tool:currentTool,lang,data:currentDep?deps[currentDep]:{}};
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:`You are a PM AI Agent for Valtec UAV maritime deployments. Reply in ${lang==='zh'?'Traditional Chinese':'English'}. Be direct, professional, specific.`,messages:[{role:'user',content:`Tool: ${currentTool}\nData: ${JSON.stringify(ctx,null,1)}\n\nRequest: ${text}`}]})});
+    const data=await res.json();
+    ld.style.fontStyle=''; ld.style.color='';
+    ld.innerHTML=(data.content?.[0]?.text||'No response').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  }catch(e){ld.style.fontStyle='';ld.textContent=`Error: ${e.message}`;}
+  document.getElementById('ai-msgs').scrollTop=99999;
+}
+
+function addAIMsg(cls,text){
+  const m=document.getElementById('ai-msgs');
+  const d=document.createElement('div'); d.className=`ai-msg ${cls}`;
+  d.innerHTML=text.replace(/\n/g,'<br>');
+  m.appendChild(d); m.scrollTop=m.scrollHeight; return d;
+}
+
+function exportCSV(){
+  if(!currentDep){return;}
+  saveCurrent(); const d=deps[currentDep];
+  let csv='',fn=`${currentDep}_${currentTool}.csv`;
+  if(currentTool==='tracker'){
+    csv='Item,Owner,Due,Status\n';
+    d.tracker.forEach(r=>{csv+=[r.item,r.owner,r.due,t('tStatus')[r.sIdx||0]].map(v=>'"'+(v||'').replace(/"/g,'""')+'"').join(',')+'\n';});
+  } else if(currentTool==='risk'){
+    csv='Risk,Category,Prob,Impact,Score,Mitigation\n';
+    d.risks.forEach(r=>{csv+=[r.desc,r.cat,r.prob,r.impact,r.score,r.mit].map(v=>'"'+(v||'').replace(/"/g,'""')+'"').join(',')+'\n';});
+  } else{alert(t('alertExport'));return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));a.download=fn;a.click();
+}
+
+deps['DLY007']=newDepData('DLY007','LungSoon Ocean Group','PJ8','Majuro, Marshall Islands','active');
+deps['DLY007'].charter.pm='Mia Lin';
+deps['DLY007'].tracker=[
+  {item:'Equipment customs clearance',owner:'PM',due:'2026-06-15',sIdx:1,note:''},
+  {item:'Jack flight confirmed',owner:'PM',due:'2026-06-10',sIdx:2,note:''},
+  {item:'GCS software update',owner:'Jack',due:'2026-06-12',sIdx:0,note:''},
+];
+switchDep('DLY007');
+renderDepTabs();
+applyI18n();
+updatePageInfo();
+renderQuickBtns();
+document.getElementById('ai-welcome').textContent=t('aiWelcome');
+document.getElementById('ai-inp').placeholder=t('aiPlaceholder');
+</script>
