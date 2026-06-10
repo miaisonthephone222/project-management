@@ -1104,8 +1104,7 @@ async function slackSend(tool){
   try{
     const res=await fetch('https://slack.com/api/chat.postMessage',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body:JSON.stringify({channel:SLACK_CHANNEL_ID,text:msg})
+      body:new URLSearchParams({token,channel:SLACK_CHANNEL_ID,text:msg})
     });
     const data=await res.json();
     if(data.ok)showToast(t('toastSent'));
