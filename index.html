@@ -3,299 +3,1130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Valtec Deployment Project Management Console</title>
-<link rel="stylesheet" href="style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Valtec PM Toolkit</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D1B2A;--blue:#185FA5;--blue-light:#E6F1FB;--blue-mid:#B5D4F4;
+  --amber:#E8A020;--amber-light:#FAEEDA;
+  --green:#3B6D11;--green-light:#EAF3DE;
+  --red:#A32D2D;--red-light:#FCEBEB;
+  --gray:#888780;--gray-light:#F1EFE8;
+  --purple:#534AB7;--purple-light:#EEEDFE;
+  --bg:#F5F7FA;--surface:#ffffff;--surface2:#F8F9FB;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1A1A1A;--text2:#555550;--text3:#8E8E89;
+  --font:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','Fira Mono','Courier New',monospace;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh;overflow:hidden}
+
+/* ── Auth overlay ── */
+#auth-overlay{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999}
+#auth-overlay.hidden{display:none}
+.auth-card{background:var(--surface);border-radius:16px;padding:36px;width:340px;text-align:center}
+.auth-logo{width:48px;height:48px;border-radius:12px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:600;margin:0 auto 16px}
+.auth-title{font-size:18px;font-weight:500;margin-bottom:6px}
+.auth-sub{font-size:12px;color:var(--text3);margin-bottom:24px}
+.auth-input{width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-family:var(--font);outline:none;margin-bottom:12px;transition:border-color .15s}
+.auth-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.auth-btn{width:100%;padding:10px;border-radius:var(--radius);border:none;background:var(--blue);color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.auth-btn:hover{opacity:.9}
+.auth-err{font-size:12px;color:var(--red);margin-top:8px;display:none}
+
+/* ── App shell ── */
+#app{display:flex;height:100vh;overflow:hidden}
+#app.hidden{display:none}
+
+/* ── Icon sidebar ── */
+.sb{width:52px;background:var(--navy);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;flex-shrink:0;z-index:10}
+.sb-logo{width:34px;height:34px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:600;margin-bottom:12px;flex-shrink:0}
+.sb-btn{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);font-size:18px;cursor:pointer;transition:all .15s;position:relative;flex-shrink:0}
+.sb-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.sb-btn.active{background:var(--blue);color:#fff}
+.sb-btn .sb-tip{position:absolute;left:48px;top:50%;transform:translateY(-50%);background:var(--text);color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100}
+.sb-btn:hover .sb-tip{opacity:1}
+.sb-sep{width:26px;height:1px;background:rgba(255,255,255,.12);margin:6px 0;flex-shrink:0}
+.sb-spacer{flex:1}
+
+/* ── Nav panel ── */
+.nav{width:210px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.nav-dep-section{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
+.nav-dep-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.dep-switcher{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:border-color .15s}
+.dep-switcher:hover{border-color:var(--border2)}
+.dep-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dep-switcher-name{flex:1;font-size:12px;font-weight:500}
+.dep-list{margin-top:8px;display:flex;flex-direction:column;gap:1px}
+.dep-row{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12px;color:var(--text2);transition:background .15s}
+.dep-row:hover{background:var(--surface2)}
+.dep-row.active{background:var(--blue-light);color:var(--blue);font-weight:500}
+.dep-row .dep-dot-sm{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dep-row .dep-status-tag{margin-left:auto;font-size:10px;font-weight:500;padding:1px 6px;border-radius:10px}
+.nav-section-label{padding:12px 14px 4px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{color:var(--blue);font-weight:500;border-left-color:var(--blue);background:var(--blue-light)}
+.nav-item i{font-size:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;background:var(--red-light);color:var(--red)}
+.nav-badge.warn{background:var(--amber-light);color:#854F0B}
+
+/* ── Main area ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topbar{height:52px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.topbar-left{display:flex;flex-direction:column;gap:1px}
+.topbar-title{font-size:14px;font-weight:500}
+.topbar-bread{font-size:11px;color:var(--text3)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.search-wrap{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:5px 10px;width:150px}
+.search-wrap input{border:none;background:transparent;font-size:12px;color:var(--text);outline:none;width:100%;font-family:var(--font)}
+.search-wrap input::placeholder{color:var(--text3)}
+.lang-toggle{display:flex;border:1px solid var(--border2);border-radius:6px;overflow:hidden}
+.lang-btn{padding:4px 9px;font-size:10px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--text3);transition:all .15s;font-family:var(--font)}
+.lang-btn.active{background:var(--blue);color:#fff}
+.tbtn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--radius);font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--font);transition:all .15s;white-space:nowrap}
+.tbtn:hover{background:var(--surface2)}
+.tbtn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+.tbtn.blue:hover{opacity:.9}
+.tbtn.slack{background:#4A154B;border-color:#4A154B;color:#fff}
+.tbtn.slack:hover{opacity:.9}
+.tbtn.ai{background:linear-gradient(135deg,#2D1B69,#185FA5);border-color:transparent;color:#fff}
+.tbtn:disabled{opacity:.5;cursor:not-allowed}
+.avatar-circle{width:30px;height:30px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--blue);flex-shrink:0}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;padding:18px 20px}
+.panel{display:none}.panel.active{display:block}
+
+/* ── Dashboard ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:flex;flex-direction:column;gap:8px}
+.sc-top{display:flex;align-items:center;justify-content:space-between}
+.sc-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sc-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}
+.sc-num{font-size:24px;font-weight:500;line-height:1}
+.sc-label{font-size:11px;color:var(--text3)}
+.sc-sub{font-size:11px;color:var(--text3)}
+
+/* ── Tables ── */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-hdr-title{font-size:13px;font-weight:500}
+.section-hdr-actions{display:flex;gap:6px}
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--surface2);padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.add-row{display:flex;align-items:center;gap:6px;padding:8px 12px;font-size:12px;color:var(--text3);cursor:pointer;background:var(--surface2);border-top:1px solid var(--border);transition:color .15s}
+.add-row:hover{color:var(--text)}
+
+/* ── Inline edit ── */
+.ie{border:none;background:transparent;font-size:12px;color:var(--text);width:100%;font-family:var(--font);padding:0;outline:none;cursor:text}
+.ie:focus{background:var(--blue-light);border-radius:4px;padding:1px 4px}
+
+/* ── Pills ── */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.pill-green{background:var(--green-light);color:var(--green)}
+.pill-amber{background:var(--amber-light);color:#854F0B}
+.pill-red{background:var(--red-light);color:var(--red)}
+.pill-blue{background:var(--blue-light);color:var(--blue)}
+.pill-gray{background:var(--gray-light);color:#5F5E5A}
+.pill-purple{background:var(--purple-light);color:var(--purple)}
+
+/* ── Progress ── */
+.prog-wrap{display:flex;align-items:center;gap:8px}
+.prog-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s}
+.prog-label{font-size:10px;color:var(--text3);min-width:30px;text-align:right}
+
+/* ── Avatars ── */
+.av-stack{display:flex;align-items:center}
+.av-sm{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;border:2px solid var(--surface);margin-left:-5px}
+.av-sm:first-child{margin-left:0}
+
+/* ── Risk score ── */
+.rs{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:20px;border-radius:5px;font-size:11px;font-weight:600;padding:0 4px}
+
+/* ── Form fields ── */
+.form-grid{display:grid;gap:10px;margin-bottom:10px}
+.fg2{grid-template-columns:1fr 1fr}
+.fg3{grid-template-columns:1fr 1fr 1fr}
+.fg1{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.field input,.field select,.field textarea{font-size:12px;border:1px solid var(--border2);border-radius:var(--radius);padding:7px 10px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+.field textarea{resize:vertical;min-height:56px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+
+/* ── Section title ── */
+.sec{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.sec:first-child{margin-top:0}
+
+/* ── Milestone rows ── */
+.ms-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ms-row:last-child{border-bottom:none}
+.chk{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;color:transparent}
+.chk.done{background:var(--green);border-color:var(--green);color:#fff}
+
+/* ── EOD blocks ── */
+.eod-blk{background:var(--surface2);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.eod-blk-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.eod-item{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:12px}
+
+/* ── Retro columns ── */
+.retro-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.rc{border-radius:var(--radius);padding:12px;border:1px solid var(--border)}
+.rc h4{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.rc.good{border-top:2px solid var(--green)}.rc.good h4{color:var(--green)}
+.rc.bad{border-top:2px solid var(--red)}.rc.bad h4{color:var(--red)}
+.rc.act{border-top:2px solid var(--amber)}.rc.act h4{color:#854F0B}
+.retro-item{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;font-size:12px}
+.radd{display:flex;gap:6px;margin-top:7px}
+.radd input{flex:1;font-size:12px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none}
+.radd input:focus{border-color:var(--blue)}
+.radd button{padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);font-size:11px;cursor:pointer;color:var(--text2);font-family:var(--font)}
+
+/* ── Slack bar ── */
+.slack-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-top:14px}
+.slack-bar-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.slack-ch{font-weight:500;color:var(--text)}
+
+/* ── Bottom grid ── */
+.btm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
+.risk-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.risk-item:last-child{border-bottom:none}
+.ms-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ms-item:last-child{border-bottom:none}
+.ms-pip{width:10px;height:10px;border-radius:50%;border:2px solid;flex-shrink:0}
+
+/* ── AI panel ── */
+.ai-panel{position:absolute;top:0;right:0;bottom:0;width:300px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:20;transform:translateX(100%);transition:transform .22s ease}
+.ai-panel.open{transform:translateX(0)}
+.main{position:relative;overflow:hidden}
+.ai-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ai-spark{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,#2D1B69,#185FA5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px}
+.ai-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ai-msg{border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.6}
+.ai-msg.u{background:var(--surface2);color:var(--text2);border-radius:8px 8px 2px 8px}
+.ai-msg.a{background:rgba(24,95,165,.07);border:1px solid rgba(24,95,165,.12);color:var(--text);border-radius:2px 8px 8px 8px}
+.ai-quick{padding:8px 12px;border-top:1px solid var(--border)}
+.ai-ql{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.ai-qbs{display:flex;flex-wrap:wrap;gap:4px}
+.ai-qb{padding:3px 8px;border-radius:20px;font-size:11px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s}
+.ai-qb:hover{color:var(--text);background:var(--blue-light)}
+.ai-inp-row{padding:9px 12px;border-top:1px solid var(--border);display:flex;gap:6px}
+.ai-inp{flex:1;font-size:12px;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--font);outline:none}
+.ai-inp:focus{border-color:var(--blue)}
+.cw{flex:1;display:flex;flex-direction:column;min-width:0;transition:margin-right .22s ease;overflow:hidden}
+.cw.ai-open{margin-right:300px}
+
+/* ── Modal ── */
+.modal-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:50;align-items:center;justify-content:center;min-height:400px}
+.modal-backdrop.show{display:flex}
+.modal-card{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:22px;width:380px;max-width:90%;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal-title{font-size:14px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;color:var(--text)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:20px;right:20px;background:#1A1A1A;color:#fff;padding:9px 16px;border-radius:var(--radius);font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;z-index:999;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── Dashboard specific ── */
+.dash-top-row{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
+</style>
 </head>
 <body>
-  <h2 class="sr-only">Valtec Deployment Project Management Console</h2>
-  <div class="app">
 
-    <!-- TOP BAR: Brand + 3 clear zones -->
-    <div class="depbar" id="depbar">
+<!-- Auth -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">V</div>
+    <div class="auth-title">Valtec PM Toolkit</div>
+    <div class="auth-sub" id="auth-sub">Enter your password to continue</div>
+    <input type="password" class="auth-input" id="auth-input" placeholder="Password" onkeydown="if(event.key==='Enter')doAuth()">
+    <button class="auth-btn" onclick="doAuth()" id="auth-btn">Continue</button>
+    <div class="auth-err" id="auth-err">Incorrect password</div>
+  </div>
+</div>
 
-      <!-- Zone A: Brand -->
-      <div class="depbar-brand">
-        <div class="logo">VALTEC <span>PM</span></div>
-        <div class="brand-sub">Deployment Console</div>
-      </div>
+<!-- App -->
+<div id="app" class="hidden">
 
-      <div class="depbar-sep"></div>
-
-      <!-- Zone B: View Navigation — Ongoing vs History -->
-      <div class="depbar-views">
-        <div class="zone-eyebrow" data-i18n="zoneProjects">Projects</div>
-        <div class="view-toggle">
-          <button id="view-ongoing" class="view-btn active" onclick="switchProjectView('ongoing')">
-            <i class="ti ti-rocket" aria-hidden="true"></i>
-            <span data-i18n="viewOngoing">Ongoing Projects</span>
-          </button>
-          <button id="view-history" class="view-btn" onclick="switchProjectView('history')">
-            <i class="ti ti-archive" aria-hidden="true"></i>
-            <span data-i18n="viewHistory">History</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="depbar-sep"></div>
-
-      <!-- Zone C: Active project tabs (scrollable) -->
-      <div id="dep-tabs" class="dep-tabs-scroll"></div>
-
-      <!-- Zone D: Create New Deployment CTA -->
-      <div class="dep-add" onclick="showModal()">
-        <i class="ti ti-circle-plus" aria-hidden="true"></i>
-        <span data-i18n="newDep">New Deployment</span>
-      </div>
-
-      <div class="depbar-spacer"></div>
-
-      <!-- Zone E: Language -->
-      <div class="lang-toggle">
-        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
-        <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">中文</button>
-      </div>
-    </div>
-
-    <div class="body">
-      <div class="sidebar">
-        <div class="sidebar-logo">
-          <div class="logo">VALTEC <span>PM</span></div>
-          <div class="dep-info">
-            <div class="dep-badge" id="dep-badge">—</div>
-            <div id="dep-status-inline"></div>
-          </div>
-        </div>
-        <div class="nav">
-          <div class="nav-section" data-i18n="navTools">Tools</div>
-          <div class="nav-item active" onclick="switchTool('charter',this)"><i class="ti ti-file-description" aria-hidden="true"></i> <span data-i18n="toolCharter">Charter</span></div>
-          <div class="nav-item" onclick="switchTool('tracker',this)"><i class="ti ti-checkbox" aria-hidden="true"></i> <span data-i18n="toolTracker">Tracker</span> <span class="nav-badge" id="badge-delayed" style="display:none">!</span></div>
-          <div class="nav-item" onclick="switchTool('eod',this)"><i class="ti ti-report" aria-hidden="true"></i> <span data-i18n="toolEod">EOD Report</span></div>
-          <div class="nav-item" onclick="switchTool('risk',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <span data-i18n="toolRisk">Risk Log</span> <span class="nav-badge" id="badge-risk" style="display:none">!</span></div>
-          <div class="nav-item" onclick="switchTool('retro',this)"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="toolRetro">Retrospective</span></div>
-        </div>
-      </div>
-
-      <div class="main" id="main-area">
-        <div class="cw" id="cw">
-          <div class="topbar">
-            <div>
-              <div class="page-title" id="page-title">Charter</div>
-              <div class="page-sub" id="page-sub"></div>
-            </div>
-            <div class="topbar-actions">
-              <button class="btn ai" onclick="toggleAI()"><i class="ti ti-sparkles" aria-hidden="true"></i> AI</button>
-              <button class="btn slack" onclick="slackSend()"><i class="ti ti-brand-slack" aria-hidden="true"></i> Slack</button>
-              <button class="btn primary" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i> <span data-i18n="export">Export</span></button>
-            </div>
-          </div>
-
-          <div class="content">
-
-            <!-- CHARTER -->
-            <div class="panel active" id="panel-charter">
-              <div class="sec" data-i18n="charterInfo">Project Info</div>
-              <div class="fg fg2">
-                <div class="f"><label data-i18n="fName">Project Name</label><input data-field="name" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fId">Project ID</label><input data-field="id" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fClient">Client</label><input data-field="client" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fVessel">Vessel</label><input data-field="vessel" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fLocation">Location</label><input data-field="location" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fPm">Project Manager</label><input data-field="pm" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fContact">Client Contact Window</label><input data-field="contact" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fStart">Start Date</label><input type="date" data-field="start" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="fEnd">End Date</label><input type="date" data-field="end" oninput="syncField(this)"></div>
-                <div class="f"><label data-i18n="depStatusLabel">Deployment Status</label>
-                  <select data-field="status" oninput="syncField(this)" class="status-select">
-                    <option value="planning" data-i18n="stPlanning">Planning</option>
-                    <option value="active" data-i18n="stActive">Active</option>
-                    <option value="done" data-i18n="stDone">Done</option>
-                  </select>
-                </div>
-              </div>
-              <div class="fg fg1">
-                <div class="f"><label data-i18n="fGoal">Objective</label><textarea data-field="goal" oninput="syncField(this)"></textarea></div>
-                <div class="f"><label data-i18n="fSuccess">Success Criteria (one per line)</label><textarea data-field="success" oninput="syncField(this)"></textarea></div>
-                <div class="f"><label data-i18n="fDetail">Detailed Information</label><textarea data-field="detail" oninput="syncField(this)"></textarea></div>
-              </div>
-              <div class="sec" data-i18n="milestones">Milestones</div>
-              <div id="ms-list"></div>
-              <div class="ar" onclick="addMs()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addMs">Add milestone</span></div>
-              <div class="slack-bar">
-                <div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackKickoff">Kick-off notice</span> → <span class="slack-ch">#project-management</span></div>
-                <button class="btn slack" onclick="previewSlackMessage('charter')"><i class="ti ti-eye" aria-hidden="true"></i> <span data-i18n="reviewSend">Review & Send</span></button>
-              </div>
-            </div>
-
-            <!-- TRACKER -->
-            <div class="panel" id="panel-tracker">
-              <div class="stats">
-                <div class="stat"><div class="v" id="t-total">0</div><div class="l" data-i18n="total">Total</div></div>
-                <div class="stat done-stat"><div class="v" id="t-done">0</div><div class="l" data-i18n="done">Done</div></div>
-                <div class="stat inprog-stat"><div class="v" id="t-inprog">0</div><div class="l" data-i18n="inprog">In Progress</div></div>
-                <div class="stat delayed-stat"><div class="v" id="t-delayed">0</div><div class="l" data-i18n="delayed">Delayed</div></div>
-              </div>
-              <div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:28px"><col><col style="width:70px"><col style="width:90px"><col style="width:90px"><col style="width:80px"></colgroup>
-                <thead><tr><th>#</th><th data-i18n="thCommitment">Commitment</th><th data-i18n="thOwner">Owner</th><th data-i18n="thDue">Due Date</th><th data-i18n="thStatus">Status</th><th data-i18n="thNote">Note</th></tr></thead>
-                <tbody id="tracker-body"></tbody>
-              </table><div class="ar" onclick="addTrackerRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
-              <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackTracker">Tracker summary</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="previewSlackMessage('tracker')"><i class="ti ti-eye" aria-hidden="true"></i> <span data-i18n="reviewSend">Review & Send</span></button></div>
-            </div>
-
-            <!-- EOD REPORT -->
-            <div class="panel" id="panel-eod">
-              <div class="fg fg3" style="margin-bottom:12px">
-                <div class="f"><label data-i18n="eodDate">Report Date</label><input type="date" id="eod-date"></div>
-                <div class="f"><label data-i18n="eodReporter">Reporter</label><input id="eod-reporter"></div>
-                <div class="f"><label data-i18n="eodWeather">Weather</label><input id="eod-weather"></div>
-              </div>
-              <div class="eblk"><div class="eblk-t" data-i18n="eodDone">Completed Today</div><div id="eod-done-list"></div>
-                <div style="display:flex;gap:6px;margin-top:6px"><input id="eod-done-in" style="flex:1;font-size:11px;padding:4px 7px;border:0.5px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);color:inherit;font-family:inherit" onkeydown="if(event.key==='Enter')addEodItem('done')"><button class="btn" style="padding:4px 8px" onclick="addEodItem('done')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
-              </div>
-              <div class="eblk"><div class="eblk-t" data-i18n="eodPlan">Planned for Tomorrow</div><div id="eod-plan-list"></div>
-                <div style="display:flex;gap:6px;margin-top:6px"><input id="eod-plan-in" style="flex:1;font-size:11px;padding:4px 7px;border:0.5px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);color:inherit;font-family:inherit" onkeydown="if(event.key==='Enter')addEodItem('plan')"><button class="btn" style="padding:4px 8px" onclick="addEodItem('plan')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
-              </div>
-              <div class="sec" data-i18n="eodIssues">Issues & Blockers</div>
-              <div class="tw"><table style="table-layout:fixed"><colgroup><col><col style="width:42px"><col><col style="width:72px"></colgroup>
-                <thead><tr><th data-i18n="thDesc">Description</th><th data-i18n="thSev">Sev.</th><th data-i18n="thAction">Action</th><th data-i18n="thStatus">Status</th></tr></thead>
-                <tbody id="eod-issue-body"></tbody>
-              </table><div class="ar" onclick="addEodIssue()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
-              <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackEod">EOD Report</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="previewSlackMessage('eod')"><i class="ti ti-eye" aria-hidden="true"></i> <span data-i18n="reviewSend">Review & Send</span></button></div>
-            </div>
-
-            <!-- RISK LOG -->
-            <div class="panel" id="panel-risk">
-              <div class="sec" data-i18n="riskReg">Risk Register</div>
-              <div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:70px"><col style="width:52px"><col style="width:56px"><col style="width:44px"><col><col style="width:65px"><col style="width:82px"></colgroup>
-                <thead><tr><th>#</th><th data-i18n="thRiskDesc">Risk</th><th data-i18n="thCat">Category</th><th data-i18n="thProb">Prob.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thScore">Score</th><th data-i18n="thMit">Mitigation</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
-                <tbody id="risk-body"></tbody>
-              </table><div class="ar" onclick="addRiskRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRisk">Add risk</span></div></div>
-              <div class="sec" style="margin-top:14px" data-i18n="issueLog">Issue Log</div>
-              <div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:28px"><col><col style="width:80px"><col style="width:36px"><col><col><col style="width:55px"><col style="width:72px"></colgroup>
-                <thead><tr><th>#</th><th data-i18n="thDesc">Description</th><th data-i18n="thDate">Date Found</th><th data-i18n="thSev">Sev.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thAction">Action</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
-                <tbody id="issue-body"></tbody>
-              </table><div class="ar" onclick="addIssueRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addIssue">Add issue</span></div></div>
-              <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackRisk">Risk summary</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="previewSlackMessage('risk')"><i class="ti ti-eye" aria-hidden="true"></i> <span data-i18n="reviewSend">Review & Send</span></button></div>
-            </div>
-
-            <!-- RETROSPECTIVE -->
-            <div class="panel" id="panel-retro">
-              <div class="fg fg3" style="margin-bottom:12px">
-                <div class="f"><label data-i18n="fId">Project ID</label><input id="retro-proj"></div>
-                <div class="f"><label data-i18n="retroDate">Retro Date</label><input type="date" id="retro-date"></div>
-                <div class="f"><label data-i18n="retroResult">Outcome</label>
-                  <select id="retro-result">
-                    <option data-i18n="retroFull" value="Full">Full delivery</option>
-                    <option data-i18n="retroPartial" value="Partial">Partial delivery</option>
-                    <option data-i18n="retroMiss" value="Miss">Not delivered</option>
-                  </select>
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
-                <div class="rc good"><h4><i class="ti ti-thumb-up" aria-hidden="true"></i> <span data-i18n="retroGood">What went well</span></h4><div id="retro-good"></div><div class="radd"><input id="r-good-in" onkeydown="if(event.key==='Enter')addRetro('good')"><button onclick="addRetro('good')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
-                <div class="rc bad"><h4><i class="ti ti-thumb-down" aria-hidden="true"></i> <span data-i18n="retroBad">Needs improvement</span></h4><div id="retro-bad"></div><div class="radd"><input id="r-bad-in" onkeydown="if(event.key==='Enter')addRetro('bad')"><button onclick="addRetro('bad')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
-                <div class="rc act"><h4><i class="ti ti-bolt" aria-hidden="true"></i> <span data-i18n="retroAct">Action items</span></h4><div id="retro-action"></div><div class="radd"><input id="r-action-in" onkeydown="if(event.key==='Enter')addRetro('action')"><button onclick="addRetro('action')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
-              </div>
-              <div class="sec" style="margin-top:14px" data-i18n="closure">Closure Checklist</div>
-              <div id="closure-list">
-                <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl1" style="font-size:12px"></div></div>
-                <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl2" style="font-size:12px"></div></div>
-                <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl3" style="font-size:12px"></div></div>
-                <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl4" style="font-size:12px"></div></div>
-                <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl5" style="font-size:12px"></div></div>
-              </div>
-              <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B" aria-hidden="true"></i> <span data-i18n="slackRetro">Retrospective summary</span> → <span class="slack-ch">#project-management</span></div><button class="btn slack" onclick="previewSlackMessage('retro')"><i class="ti ti-eye" aria-hidden="true"></i> <span data-i18n="reviewSend">Review & Send</span></button></div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- AI PANEL -->
-        <div class="ai-panel" id="ai-panel">
-          <div class="ai-hdr">
-            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500"><div class="ai-spark"><i class="ti ti-sparkles" style="font-size:10px" aria-hidden="true"></i></div> <span data-i18n="aiPanelTitle">AI Agent</span></div>
-            <i class="ti ti-x" style="font-size:15px;cursor:pointer;color:var(--text-secondary)" onclick="toggleAI()" aria-label="Close"></i>
-          </div>
-          <div class="ai-key-row" id="ai-key-row">
-            <i class="ti ti-key" style="font-size:13px;color:var(--text-tertiary)" aria-hidden="true"></i>
-            <input class="ai-key-inp" id="ai-key-inp" type="password" placeholder="Paste Anthropic API key…" oninput="saveApiKey(this.value)" onchange="saveApiKey(this.value)" onpaste="setTimeout(()=>saveApiKey(this.value),0)">
-            <span class="ai-key-status" id="ai-key-status"></span>
-          </div>
-          <div class="ai-msgs" id="ai-msgs"><div class="ai-msg a" id="ai-welcome"></div></div>
-          <div class="ai-quick"><div class="ai-ql" data-i18n="quickCmds">Quick commands</div><div class="ai-qbs" id="ai-qbs"></div></div>
-          <div class="ai-inp-row">
-            <input class="ai-inp" id="ai-inp" onkeydown="if(event.key==='Enter')sendAI()">
-            <button class="btn primary" style="padding:10px 14px" onclick="sendAI()"><i class="ti ti-send" aria-hidden="true"></i></button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- NEW DEPLOYMENT MODAL -->
-    <dialog class="modal-wrap" id="ndm">
-      <div class="modal-card">
-        <div class="modal-title">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="modal-icon"><i class="ti ti-circle-plus" style="font-size:15px" aria-hidden="true"></i></div>
-            <span data-i18n="newDepTitle">New Deployment</span>
-          </div>
-          <i class="ti ti-x" style="cursor:pointer;color:var(--text-secondary);font-size:15px" onclick="hideModal()" aria-label="Close"></i>
-        </div>
-        <div class="fg fg2" style="margin-bottom:12px">
-          <div class="f"><label data-i18n="fId">Project ID</label><input id="ndm-id"></div>
-          <div class="f"><label data-i18n="fClient">Client</label><input id="ndm-client"></div>
-          <div class="f"><label data-i18n="fVessel">Vessel</label><input id="ndm-vessel"></div>
-          <div class="f"><label data-i18n="fLocation">Location</label><input id="ndm-location"></div>
-        </div>
-        <div class="fg fg1" style="margin-bottom:14px">
-          <div class="f"><label data-i18n="depStatus">Status</label>
-            <select id="ndm-status">
-              <option value="planning" data-i18n="stPlanning">Planning</option>
-              <option value="active" data-i18n="stActive">Active</option>
-              <option value="done" data-i18n="stDone">Done</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px">
-          <button class="btn" onclick="hideModal()" data-i18n="cancel">Cancel</button>
-          <button class="btn primary" onclick="createDep()"><i class="ti ti-circle-plus" aria-hidden="true"></i> <span data-i18n="create">Create</span></button>
-        </div>
-      </div>
-    </dialog>
+  <!-- Icon sidebar -->
+  <div class="sb">
+    <div class="sb-logo">V</div>
+    <div class="sb-btn active" onclick="switchTool('dashboard',this)" title="Dashboard"><i class="ti ti-layout-dashboard" aria-hidden="true"></i><span class="sb-tip">Dashboard</span></div>
+    <div class="sb-btn" onclick="switchTool('charter',this)"><i class="ti ti-file-description" aria-hidden="true"></i><span class="sb-tip">Charter</span></div>
+    <div class="sb-btn" onclick="switchTool('tracker',this)"><i class="ti ti-checkbox" aria-hidden="true"></i><span class="sb-tip">Tracker</span></div>
+    <div class="sb-btn" onclick="switchTool('eod',this)"><i class="ti ti-report" aria-hidden="true"></i><span class="sb-tip">EOD Report</span></div>
+    <div class="sb-btn" onclick="switchTool('risk',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span class="sb-tip">Risk log</span></div>
+    <div class="sb-btn" onclick="switchTool('retro',this)"><i class="ti ti-refresh" aria-hidden="true"></i><span class="sb-tip">Retrospective</span></div>
+    <div class="sb-sep"></div>
+    <div class="sb-btn" onclick="slackSend()"><i class="ti ti-brand-slack" aria-hidden="true"></i><span class="sb-tip">Send to Slack</span></div>
+    <div class="sb-spacer"></div>
+    <div class="sb-btn" onclick="toggleAI()"><i class="ti ti-sparkles" aria-hidden="true"></i><span class="sb-tip">AI Agent</span></div>
+    <div class="sb-btn"><i class="ti ti-settings" aria-hidden="true"></i><span class="sb-tip">Settings</span></div>
   </div>
 
-  <div class="toast" id="toast"><i class="ti ti-brand-slack" aria-hidden="true"></i><span id="toast-msg"></span></div>
-
-  <!-- SLACK PREVIEW MODAL -->
-  <dialog class="modal-wrap" id="slack-preview">
-    <div class="modal-card slack-preview-card">
-      <div class="modal-title">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="slack-modal-icon"><i class="ti ti-brand-slack" style="font-size:15px;color:#fff" aria-hidden="true"></i></div>
-          <div>
-            <div style="font-size:14px;font-weight:700" data-i18n="slackPreviewTitle">Review Message</div>
-            <div style="font-size:11px;color:var(--text-secondary);font-weight:400;margin-top:1px">→ <span class="slack-ch">#project-management</span></div>
-          </div>
-        </div>
-        <i class="ti ti-x" style="cursor:pointer;color:var(--text-secondary);font-size:15px" onclick="hideSlackPreview()" aria-label="Close"></i>
+  <!-- Nav panel -->
+  <div class="nav" id="nav-panel">
+    <div class="nav-dep-section">
+      <div class="nav-dep-label" data-i18n="depLabel">Deployments</div>
+      <div class="dep-switcher">
+        <div class="dep-dot" id="nav-dep-dot" style="background:var(--green)"></div>
+        <span class="dep-switcher-name" id="nav-dep-name">—</span>
+        <i class="ti ti-selector" style="font-size:14px;color:var(--text3)" aria-hidden="true"></i>
       </div>
-      <div class="slack-preview-note" data-i18n="slackPreviewNote">Review and edit the message below before sending to Slack.</div>
-      <div class="fg fg1" style="margin-bottom:16px">
-        <textarea id="slack-preview-text" class="slack-preview-textarea"></textarea>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:8px">
-        <button class="btn" onclick="hideSlackPreview()" data-i18n="cancel">Cancel</button>
-        <button class="btn slack-send-btn" onclick="slackSendConfirmed()">
-          <i class="ti ti-brand-slack" aria-hidden="true"></i>
-          <span data-i18n="slackSendBtn">Send to #project-management</span>
-        </button>
+      <div class="dep-list" id="dep-list"></div>
+      <div class="dep-row" onclick="showModal()" style="color:var(--text3);margin-top:2px">
+        <i class="ti ti-plus" style="font-size:13px" aria-hidden="true"></i>
+        <span data-i18n="newDep">New deployment</span>
       </div>
     </div>
-  </dialog>
+    <div class="nav-section-label" data-i18n="navTools">Tools</div>
+    <div class="nav-item active" onclick="switchTool('dashboard',this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> <span data-i18n="toolDash">Dashboard</span></div>
+    <div class="nav-item" onclick="switchTool('charter',this)"><i class="ti ti-file-description" aria-hidden="true"></i> <span data-i18n="toolCharter">Charter</span></div>
+    <div class="nav-item" onclick="switchTool('tracker',this)"><i class="ti ti-checkbox" aria-hidden="true"></i> <span data-i18n="toolTracker">Tracker</span> <span class="nav-badge warn" id="badge-delayed" style="display:none">!</span></div>
+    <div class="nav-item" onclick="switchTool('eod',this)"><i class="ti ti-report" aria-hidden="true"></i> <span data-i18n="toolEod">EOD Report</span></div>
+    <div class="nav-item" onclick="switchTool('risk',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <span data-i18n="toolRisk">Risk Log</span> <span class="nav-badge" id="badge-risk" style="display:none">!</span></div>
+    <div class="nav-item" onclick="switchTool('retro',this)"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="toolRetro">Retrospective</span></div>
+  </div>
 
-  <script src="script.js"></script>
+  <!-- Main -->
+  <div class="main" id="main-area">
+    <div class="cw" id="cw">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-bread" id="topbar-bread">—</div>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+        </div>
+        <div class="topbar-right">
+          <div class="search-wrap"><i class="ti ti-search" style="font-size:14px;color:var(--text3)" aria-hidden="true"></i><input placeholder="Search…" data-i18n-ph="search"></div>
+          <div class="lang-toggle"><button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button><button class="lang-btn" id="btn-zh" onclick="setLang('zh')">中文</button></div>
+          <button class="tbtn slack" onclick="slackSend()"><i class="ti ti-brand-slack" aria-hidden="true"></i> Slack</button>
+          <button class="tbtn ai" onclick="toggleAI()"><i class="ti ti-sparkles" aria-hidden="true"></i> AI</button>
+          <div class="avatar-circle" id="avatar-initials">ML</div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div class="panel active" id="panel-dashboard">
+          <div class="stat-grid" id="dash-stats">
+            <div class="stat-card">
+              <div class="sc-top"><div class="sc-icon" style="background:var(--blue-light);color:var(--blue)"><i class="ti ti-checkbox" aria-hidden="true"></i></div><span class="sc-badge" id="dash-delayed-badge" style="background:var(--amber-light);color:#854F0B"></span></div>
+              <div class="sc-label" data-i18n="dashCommit">Commitments</div>
+              <div class="sc-num" id="dash-commit-num">—</div>
+              <div class="sc-sub" id="dash-commit-sub">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-top"><div class="sc-icon" style="background:var(--red-light);color:var(--red)"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div><span class="sc-badge" id="dash-risk-badge" style="background:var(--red-light);color:var(--red)"></span></div>
+              <div class="sc-label" data-i18n="dashRisks">Open risks</div>
+              <div class="sc-num" id="dash-risk-num">—</div>
+              <div class="sc-sub" id="dash-risk-sub">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-top"><div class="sc-icon" style="background:var(--green-light);color:var(--green)"><i class="ti ti-flag" aria-hidden="true"></i></div><span class="sc-badge pill-green" id="dash-ms-badge"></span></div>
+              <div class="sc-label" data-i18n="dashMs">Milestones</div>
+              <div class="sc-num" id="dash-ms-num">—</div>
+              <div class="sc-sub" id="dash-ms-sub">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-top"><div class="sc-icon" style="background:var(--amber-light);color:#854F0B"><i class="ti ti-calendar" aria-hidden="true"></i></div><span class="sc-badge" id="dash-date-badge" style="background:var(--blue-light);color:var(--blue)"></span></div>
+              <div class="sc-label" data-i18n="dashPm">Project manager</div>
+              <div class="sc-num" style="font-size:16px;padding-top:4px" id="dash-pm-name">—</div>
+              <div class="sc-sub" id="dash-location-sub">—</div>
+            </div>
+          </div>
+          <div class="btm-grid">
+            <div class="mini-card">
+              <div class="section-hdr"><div class="section-hdr-title" data-i18n="toolRisk">Risk log</div><button class="tbtn" style="font-size:11px;padding:4px 9px" onclick="switchTool('risk',null)" data-i18n="viewAll">View all</button></div>
+              <div id="dash-risk-list">—</div>
+            </div>
+            <div class="mini-card">
+              <div class="section-hdr"><div class="section-hdr-title" data-i18n="milestones">Milestones</div><button class="tbtn" style="font-size:11px;padding:4px 9px" onclick="switchTool('charter',null)" data-i18n="viewAll">View all</button></div>
+              <div id="dash-ms-list">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARTER -->
+        <div class="panel" id="panel-charter">
+          <div class="sec" data-i18n="charterInfo">Project info</div>
+          <div class="form-grid fg2">
+            <div class="field"><label data-i18n="fName">Project name</label><input data-field="name" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fId">Project ID</label><input data-field="id" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fClient">Client</label><input data-field="client" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fVessel">Vessel</label><input data-field="vessel" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fLocation">Location</label><input data-field="location" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fPm">Project manager</label><input data-field="pm" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fStart">Start date</label><input type="date" data-field="start" oninput="syncField(this)"></div>
+            <div class="field"><label data-i18n="fEnd">End date</label><input type="date" data-field="end" oninput="syncField(this)"></div>
+          </div>
+          <div class="form-grid fg1">
+            <div class="field"><label data-i18n="fGoal">Objective</label><textarea data-field="goal" oninput="syncField(this)"></textarea></div>
+            <div class="field"><label data-i18n="fSuccess">Success criteria (one per line)</label><textarea data-field="success" oninput="syncField(this)"></textarea></div>
+          </div>
+          <div class="sec" data-i18n="milestones">Milestones</div>
+          <div id="ms-list"></div>
+          <div class="add-row" onclick="addMs()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addMs">Add milestone</span></div>
+          <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackKickoff">Kick-off notice</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('charter')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+        </div>
+
+        <!-- TRACKER -->
+        <div class="panel" id="panel-tracker">
+          <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+            <div class="stat-card"><div class="sc-label" data-i18n="total">Total</div><div class="sc-num" id="t-total">0</div></div>
+            <div class="stat-card"><div class="sc-label" data-i18n="done">Done</div><div class="sc-num" id="t-done" style="color:var(--green)">0</div></div>
+            <div class="stat-card"><div class="sc-label" data-i18n="inprog">In progress</div><div class="sc-num" id="t-inprog" style="color:#854F0B">0</div></div>
+            <div class="stat-card"><div class="sc-label" data-i18n="delayed">Delayed</div><div class="sc-num" id="t-delayed" style="color:var(--red)">0</div></div>
+          </div>
+          <div class="tbl-wrap"><table style="table-layout:fixed">
+            <colgroup><col style="width:28px"><col><col style="width:72px"><col style="width:92px"><col style="width:74px"><col style="width:140px"><col style="width:80px"></colgroup>
+            <thead><tr><th>#</th><th data-i18n="thCommitment">Commitment</th><th data-i18n="thOwner">Owner</th><th data-i18n="thDue">Due date</th><th data-i18n="thPriority">Priority</th><th data-i18n="thProgress">Progress</th><th data-i18n="thStatus">Status</th></tr></thead>
+            <tbody id="tracker-body"></tbody>
+          </table><div class="add-row" onclick="addTrackerRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
+          <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackTracker">Tracker summary</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('tracker')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+        </div>
+
+        <!-- EOD -->
+        <div class="panel" id="panel-eod">
+          <div class="form-grid fg3" style="margin-bottom:14px">
+            <div class="field"><label data-i18n="eodDate">Report date</label><input type="date" id="eod-date"></div>
+            <div class="field"><label data-i18n="eodReporter">Reporter</label><input id="eod-reporter"></div>
+            <div class="field"><label data-i18n="eodWeather">Weather</label><input id="eod-weather"></div>
+          </div>
+          <div class="eod-blk"><div class="eod-blk-title" data-i18n="eodDone">Completed today</div><div id="eod-done-list"></div>
+            <div style="display:flex;gap:7px;margin-top:7px"><input id="eod-done-in" style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--font);outline:none" onkeydown="if(event.key==='Enter')addEodItem('done')"><button class="tbtn" style="padding:5px 9px" onclick="addEodItem('done')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
+          </div>
+          <div class="eod-blk"><div class="eod-blk-title" data-i18n="eodPlan">Planned tomorrow</div><div id="eod-plan-list"></div>
+            <div style="display:flex;gap:7px;margin-top:7px"><input id="eod-plan-in" style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--font);outline:none" onkeydown="if(event.key==='Enter')addEodItem('plan')"><button class="tbtn" style="padding:5px 9px" onclick="addEodItem('plan')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
+          </div>
+          <div class="sec" data-i18n="eodIssues">Issues & blockers</div>
+          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col><col style="width:44px"><col><col style="width:60px"></colgroup>
+            <thead><tr><th data-i18n="thDesc">Description</th><th data-i18n="thSev">Sev.</th><th data-i18n="thAction">Action</th><th data-i18n="thStatus">Status</th></tr></thead>
+            <tbody id="eod-issue-body"></tbody>
+          </table><div class="add-row" onclick="addEodIssue()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
+          <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackEod">EOD Report</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('eod')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+        </div>
+
+        <!-- RISK -->
+        <div class="panel" id="panel-risk">
+          <div class="sec" data-i18n="riskReg">Risk register</div>
+          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:52px"><col style="width:38px"><col style="width:38px"><col style="width:30px"><col><col style="width:58px"><col style="width:60px"></colgroup>
+            <thead><tr><th>#</th><th data-i18n="thRiskDesc">Risk</th><th data-i18n="thCat">Category</th><th data-i18n="thProb">Prob.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thScore">Score</th><th data-i18n="thMit">Mitigation</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
+            <tbody id="risk-body"></tbody>
+          </table><div class="add-row" onclick="addRiskRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRisk">Add risk</span></div></div>
+          <div class="sec" style="margin-top:16px" data-i18n="issueLog">Issue log</div>
+          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:82px"><col style="width:38px"><col><col><col style="width:58px"><col style="width:60px"></colgroup>
+            <thead><tr><th>#</th><th data-i18n="thDesc">Description</th><th data-i18n="thDate">Date found</th><th data-i18n="thSev">Sev.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thAction">Action</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
+            <tbody id="issue-body"></tbody>
+          </table><div class="add-row" onclick="addIssueRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addIssue">Add issue</span></div></div>
+          <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackRisk">Risk summary</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('risk')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+        </div>
+
+        <!-- RETRO -->
+        <div class="panel" id="panel-retro">
+          <div class="form-grid fg3" style="margin-bottom:14px">
+            <div class="field"><label data-i18n="fId">Project ID</label><input id="retro-proj"></div>
+            <div class="field"><label data-i18n="retroDate">Retro date</label><input type="date" id="retro-date"></div>
+            <div class="field"><label data-i18n="retroResult">Outcome</label><select id="retro-result"><option value="0" data-i18n="retroFull">Full delivery</option><option value="1" data-i18n="retroPartial">Partial delivery</option><option value="2" data-i18n="retroMiss">Not delivered</option></select></div>
+          </div>
+          <div class="retro-cols">
+            <div class="rc good"><h4><i class="ti ti-thumb-up" aria-hidden="true"></i> <span data-i18n="retroGood">What went well</span></h4><div id="retro-good"></div><div class="radd"><input id="r-good-in" onkeydown="if(event.key==='Enter')addRetro('good')"><button onclick="addRetro('good')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
+            <div class="rc bad"><h4><i class="ti ti-thumb-down" aria-hidden="true"></i> <span data-i18n="retroBad">Needs improvement</span></h4><div id="retro-bad"></div><div class="radd"><input id="r-bad-in" onkeydown="if(event.key==='Enter')addRetro('bad')"><button onclick="addRetro('bad')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
+            <div class="rc act"><h4><i class="ti ti-bolt" aria-hidden="true"></i> <span data-i18n="retroAct">Action items</span></h4><div id="retro-action"></div><div class="radd"><input id="r-action-in" onkeydown="if(event.key==='Enter')addRetro('action')"><button onclick="addRetro('action')"><i class="ti ti-plus" aria-hidden="true"></i></button></div></div>
+          </div>
+          <div class="sec" style="margin-top:16px" data-i18n="closure">Closure checklist</div>
+          <div id="closure-list">
+            <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl1" style="font-size:12px"></div></div>
+            <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl2" style="font-size:12px"></div></div>
+            <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl3" style="font-size:12px"></div></div>
+            <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl4" style="font-size:12px"></div></div>
+            <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl5" style="font-size:12px"></div></div>
+          </div>
+          <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackRetro">Retrospective summary</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('retro')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+        </div>
+
+      </div><!-- end content -->
+    </div><!-- end cw -->
+
+    <!-- AI Panel -->
+    <div class="ai-panel" id="ai-panel">
+      <div class="ai-hdr">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500"><div class="ai-spark"><i class="ti ti-sparkles" style="font-size:10px" aria-hidden="true"></i></div> AI Agent</div>
+        <i class="ti ti-x" style="font-size:16px;cursor:pointer;color:var(--text3)" onclick="toggleAI()" aria-label="Close AI panel"></i>
+      </div>
+      <div class="ai-msgs" id="ai-msgs"><div class="ai-msg a" id="ai-welcome"></div></div>
+      <div class="ai-quick"><div class="ai-ql" data-i18n="quickCmds">Quick commands</div><div class="ai-qbs" id="ai-qbs"></div></div>
+      <div class="ai-inp-row"><input class="ai-inp" id="ai-inp" onkeydown="if(event.key==='Enter')sendAI()"><button class="tbtn ai" style="padding:6px 10px" onclick="sendAI()"><i class="ti ti-send" aria-hidden="true"></i></button></div>
+    </div>
+  </div><!-- end main -->
+
+  <!-- New Deployment Modal -->
+  <div class="modal-backdrop" id="ndm">
+    <div class="modal-card">
+      <div class="modal-title"><span data-i18n="newDepTitle">New deployment</span><i class="ti ti-x" style="cursor:pointer;color:var(--text3);font-size:16px" onclick="hideModal()" aria-label="Close"></i></div>
+      <div class="form-grid fg2" style="margin-bottom:12px">
+        <div class="field"><label data-i18n="fId">Project ID</label><input id="ndm-id"></div>
+        <div class="field"><label data-i18n="fClient">Client</label><input id="ndm-client"></div>
+        <div class="field"><label data-i18n="fVessel">Vessel</label><input id="ndm-vessel"></div>
+        <div class="field"><label data-i18n="fLocation">Location</label><input id="ndm-location"></div>
+      </div>
+      <div class="form-grid fg1" style="margin-bottom:16px">
+        <div class="field"><label data-i18n="depStatus">Status</label>
+          <select id="ndm-status"><option value="planning" data-i18n="stPlanning">Planning</option><option value="active" data-i18n="stActive">Active</option><option value="done" data-i18n="stDone">Done</option></select>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="tbtn" onclick="hideModal()" data-i18n="cancel">Cancel</button>
+        <button class="tbtn blue" onclick="createDep()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="create">Create</span></button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app -->
+
+<div class="toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toast-msg"></span></div>
+
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const PASS="ValtecisValteq",AUTH_KEY="valtec_auth",SESSION_H=8;
+function doAuth(){
+  const v=document.getElementById('auth-input').value;
+  if(v===PASS){
+    sessionStorage.setItem(AUTH_KEY,JSON.stringify({ts:Date.now()}));
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    init();
+  } else {
+    document.getElementById('auth-err').style.display='block';
+    document.getElementById('auth-input').value='';
+    document.getElementById('auth-input').focus();
+  }
+}
+(function(){
+  const s=sessionStorage.getItem(AUTH_KEY);
+  if(s){const{ts}=JSON.parse(s);if(Date.now()-ts<SESSION_H*3600000){
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+  }}
+  document.getElementById('auth-input').addEventListener('keydown',e=>{if(e.key==='Enter')doAuth();});
+})();
+
+// ── i18n ──────────────────────────────────────────────────────────────────────
+const T={
+  en:{
+    depLabel:'Deployments',newDep:'New deployment',navTools:'Tools',
+    toolDash:'Dashboard',toolCharter:'Charter',toolTracker:'Tracker',toolEod:'EOD Report',toolRisk:'Risk Log',toolRetro:'Retrospective',
+    send:'Send',addRow:'Add',cancel:'Cancel',create:'Create',viewAll:'View all',
+    charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',
+    fName:'Project name',fId:'Project ID',fClient:'Client',fVessel:'Vessel',fLocation:'Location',
+    fPm:'Project manager',fStart:'Start date',fEnd:'End date',fGoal:'Objective',fSuccess:'Success criteria (one per line)',
+    total:'Total',done:'Done',inprog:'In progress',delayed:'Delayed',
+    thCommitment:'Commitment',thOwner:'Owner',thDue:'Due date',thPriority:'Priority',thProgress:'Progress',thStatus:'Status',
+    thDesc:'Description',thSev:'Sev.',thAction:'Action',thCat:'Category',thProb:'Prob.',thImpact:'Impact',thScore:'Score',thMit:'Mitigation',thDate:'Date found',thRiskDesc:'Risk',
+    eodDate:'Report date',eodReporter:'Reporter',eodWeather:'Weather',eodDone:'Completed today',eodPlan:'Planned tomorrow',eodIssues:'Issues & blockers',
+    riskReg:'Risk register',issueLog:'Issue log',addRisk:'Add risk',addIssue:'Add issue',
+    retroDate:'Retro date',retroResult:'Outcome',retroGood:'What went well',retroBad:'Needs improvement',retroAct:'Action items',
+    closure:'Closure checklist',retroFull:'Full delivery',retroPartial:'Partial delivery',retroMiss:'Not delivered',
+    newDepTitle:'New deployment',depStatus:'Status',stPlanning:'Planning',stActive:'Active',stDone:'Done',
+    slackKickoff:'Kick-off notice',slackTracker:'Tracker summary',slackEod:'EOD Report',slackRisk:'Risk summary',slackRetro:'Retrospective summary',
+    quickCmds:'Quick commands',search:'Search…',
+    cl1:'All deliverables signed off',cl2:'Equipment inventoried & logged',cl3:'Flight records archived',cl4:'Client training docs handed over',cl5:'Lessons learned updated to SOP',
+    dashCommit:'Commitments',dashRisks:'Open risks',dashMs:'Milestones',dashPm:'Project manager',
+    msStatus:['Pending','In progress','Done','Delayed'],tStatus:['Pending','In progress','Done','Delayed','Cancelled'],
+    rStatus:['Open','Monitoring','Closed'],iStatus:['Open','In progress','Closed'],sevOpts:['P1','P2','P3','P4'],
+    pOpts:['Critical','High','Medium','Low'],
+    aiWelcome:'AI Agent ready. All five tools are linked — switch deployments and data stays in sync.',
+    aiPh:'Ask AI…',
+    quick:{
+      dashboard:['Summarise project status','Identify top risks','Draft status update email'],
+      charter:['Generate ClickUp tasks','Draft kick-off email','Assess milestone risks'],
+      tracker:['Analyse delayed items','Suggest priorities','Draft Slack summary'],
+      eod:['Draft client update','Analyse today\'s issues','Generate EOD Slack message'],
+      risk:['Deep risk analysis','Top risk mitigation plan','Generate risk alert'],
+      retro:['Summarise lessons learned','Generate action items','Draft closure report'],
+    },
+    pageInfo:{
+      dashboard:{title:'Dashboard',sub:'Project overview'},
+      charter:{title:'Charter',sub:'Project definition — scope, milestones, stakeholders'},
+      tracker:{title:'Commitment Tracker',sub:'Track all commitments and ownership'},
+      eod:{title:'EOD Report',sub:'Daily close-out — completed, planned, issues'},
+      risk:{title:'Risk & Issue Log',sub:'Risk register + issue log'},
+      retro:{title:'Retrospective',sub:'Project review — wins, improvements, actions'},
+    },
+    toastSent:'Sent to #project-management',
+    errNoId:'Please enter a project ID.',errDup:'This ID already exists.',errMin:'At least one deployment must remain.',
+    errDel:(id)=>`Delete ${id}?`,errExport:'Export available for Tracker and Risk Log.',
+  },
+  zh:{
+    depLabel:'部署專案',newDep:'新增部署',navTools:'工具',
+    toolDash:'總覽',toolCharter:'Charter',toolTracker:'Tracker',toolEod:'EOD 報告',toolRisk:'風險紀錄',toolRetro:'回顧',
+    send:'發送',addRow:'新增',cancel:'取消',create:'建立',viewAll:'查看全部',
+    charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',
+    fName:'專案名稱',fId:'專案編號',fClient:'客戶',fVessel:'船隻',fLocation:'作業地點',
+    fPm:'專案經理',fStart:'起始日',fEnd:'結束日',fGoal:'主要目標',fSuccess:'成功標準（每行一條）',
+    total:'總計',done:'完成',inprog:'進行中',delayed:'延遲',
+    thCommitment:'承諾事項',thOwner:'負責人',thDue:'截止日',thPriority:'優先度',thProgress:'進度',thStatus:'狀態',
+    thDesc:'描述',thSev:'嚴重度',thAction:'應對措施',thCat:'類別',thProb:'機率',thImpact:'影響',thScore:'分數',thMit:'應對措施',thDate:'發現日期',thRiskDesc:'風險描述',
+    eodDate:'報告日期',eodReporter:'回報人',eodWeather:'天候',eodDone:'今日完成',eodPlan:'明日計畫',eodIssues:'問題 & 障礙',
+    riskReg:'風險登錄',issueLog:'問題登錄',addRisk:'新增風險',addIssue:'新增問題',
+    retroDate:'回顧日期',retroResult:'最終結果',retroGood:'做得好',retroBad:'需改進',retroAct:'Action Items',
+    closure:'結案 Checklist',retroFull:'全數達成',retroPartial:'部分達成',retroMiss:'未達成',
+    newDepTitle:'新增 Deployment',depStatus:'狀態',stPlanning:'規劃中',stActive:'進行中',stDone:'已完成',
+    slackKickoff:'Kick-off 通知',slackTracker:'Tracker 摘要',slackEod:'EOD 報告',slackRisk:'風險摘要',slackRetro:'回顧摘要',
+    quickCmds:'快速指令',search:'搜尋…',
+    cl1:'交付物清單已全部 Sign-off',cl2:'所有設備已盤點 & 紀錄',cl3:'飛行紀錄已存檔',cl4:'客戶培訓文件已移交',cl5:'Lessons Learned 已更新至 SOP',
+    dashCommit:'承諾事項',dashRisks:'開啟風險',dashMs:'里程碑',dashPm:'專案經理',
+    msStatus:['待開始','進行中','完成','延遲'],tStatus:['待處理','進行中','完成','延遲','取消'],
+    rStatus:['開啟','監控中','關閉'],iStatus:['開啟','處理中','關閉'],sevOpts:['P1','P2','P3','P4'],
+    pOpts:['緊急','高','中','低'],
+    aiWelcome:'AI Agent 已就緒。五個工具全部連動，切換 Deployment 時資料同步更新。',
+    aiPh:'問 AI…',
+    quick:{
+      dashboard:['總結專案現況','找出最高風險','起草狀態更新信'],
+      charter:['產生 ClickUp 任務','起草 Kick-off 信件','評估里程碑風險'],
+      tracker:['分析延遲項目','建議優先順序','產生 Slack 摘要'],
+      eod:['起草客戶更新信','分析今日問題','產生 EOD Slack'],
+      risk:['深度風險分析','建議應對策略','產生風險警示'],
+      retro:['歸納 Lessons Learned','產生 Action Items','起草結案摘要'],
+    },
+    pageInfo:{
+      dashboard:{title:'總覽',sub:'專案狀態一覽'},
+      charter:{title:'Charter',sub:'啟案文件 — 定義範疇、里程碑、利害關係人'},
+      tracker:{title:'Commitment Tracker',sub:'承諾事項追蹤'},
+      eod:{title:'EOD 報告',sub:'每日結案報告'},
+      risk:{title:'風險 & 問題紀錄',sub:'風險登錄 + 問題登錄'},
+      retro:{title:'回顧',sub:'專案回顧'},
+    },
+    toastSent:'已發送至 #project-management',
+    errNoId:'請填寫專案編號。',errDup:'此編號已存在。',errMin:'至少保留一個 Deployment。',
+    errDel:(id)=>`確定刪除 ${id}？`,errExport:'目前支援 Tracker 和 Risk Log 匯出。',
+  }
+};
+let lang='en';
+function t(k){return T[lang][k]??T.en[k]??k;}
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('btn-zh').classList.toggle('active',l==='zh');
+  applyI18n(); updatePageInfo(); renderQuickBtns();
+  document.getElementById('ai-inp').placeholder=t('aiPh');
+  document.getElementById('ai-welcome').textContent=t('aiWelcome');
+  if(currentDep) renderDynamic();
+}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-val]').forEach(el=>el.value=t(el.dataset.i18nVal));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let deps={}, currentDep=null, currentTool='dashboard', aiOpen=false, riskCount=0, issueCount=0;
+const SLACK_WEBHOOK=''; // Add your Slack Incoming Webhook URL here
+const SLACK_CHANNEL_ID='C0BA2KNLDCY';
+const SC={planning:'#E8A020',active:'#3B6D11',done:'#888780'};
+
+function newDepData(id,client,vessel,location,status){
+  return{
+    id,client,vessel,location,status,
+    charter:{name:'',id,client,vessel,location,pm:'',start:'',end:'',goal:'',success:''},
+    milestones:[
+      {name:'T-30 — Requirements & equipment list frozen',date:'',sIdx:0,done:false},
+      {name:'T-14 — Equipment ready & shipped',date:'',sIdx:0,done:false},
+      {name:'T-7 — Customs docs complete',date:'',sIdx:0,done:false},
+      {name:'T-0 — Arrive on site',date:'',sIdx:0,done:false},
+      {name:'Installation & flight test pass',date:'',sIdx:0,done:false},
+      {name:'Client sign-off',date:'',sIdx:0,done:false},
+    ],
+    tracker:[],
+    eod:{date:new Date().toISOString().slice(0,10),reporter:'',weather:'',done:[],plan:[],issues:[]},
+    risks:[
+      {desc:'Vessel schedule change',cat:'Logistics',prob:'H',impact:'H',score:9,mit:'Reconfirm T-7; flexible departure date',owner:'PM',sIdx:0},
+      {desc:'Equipment customs hold',cat:'Logistics',prob:'M',impact:'H',score:6,mit:'Prepare import documents early',owner:'PM',sIdx:0},
+      {desc:'Onsite network instability',cat:'Technical',prob:'H',impact:'M',score:6,mit:'Backup SIM; offline mode',owner:'Engineer',sIdx:0},
+    ],
+    issues:[],
+    retro:{proj:id,date:new Date().toISOString().slice(0,10),rIdx:0,good:[],bad:[],actions:[]},
+  };
+}
+
+// ── Deployment management ─────────────────────────────────────────────────────
+function createDep(){
+  const id=document.getElementById('ndm-id').value.trim();
+  if(!id){alert(t('errNoId'));return;}
+  if(deps[id]){alert(t('errDup'));return;}
+  deps[id]=newDepData(id,
+    document.getElementById('ndm-client').value.trim(),
+    document.getElementById('ndm-vessel').value.trim(),
+    document.getElementById('ndm-location').value.trim(),
+    document.getElementById('ndm-status').value
+  );
+  hideModal();renderDepList();switchDep(id);
+}
+function renderDepList(){
+  const el=document.getElementById('dep-list');
+  el.innerHTML=Object.keys(deps).map(id=>{
+    const d=deps[id];const act=id===currentDep?'active':'';
+    const sc=SC[d.status]||'#888';
+    const tag=d.status==='active'?`<span class="dep-status-tag" style="background:var(--green-light);color:var(--green)">${t('stActive')}</span>`:
+               d.status==='planning'?`<span class="dep-status-tag" style="background:var(--amber-light);color:#854F0B">${t('stPlanning')}</span>`:
+               `<span class="dep-status-tag" style="background:var(--gray-light);color:#5F5E5A">${t('stDone')}</span>`;
+    return`<div class="dep-row ${act}" onclick="switchDep('${id}')">
+      <div class="dep-dot-sm" style="background:${sc}"></div>
+      <span style="flex:1">${id}${d.client?' · '+d.client.slice(0,8):''}</span>
+      ${tag}
+      <i class="ti ti-x" style="font-size:12px;color:var(--text3);margin-left:4px" onclick="event.stopPropagation();deleteDep('${id}')" aria-label="Delete ${id}"></i>
+    </div>`;
+  }).join('');
+}
+function switchDep(id){
+  if(currentDep) saveCurrent();
+  currentDep=id;renderDepList();loadDep(id);
+  const d=deps[id];
+  document.getElementById('nav-dep-name').textContent=id;
+  document.getElementById('nav-dep-dot').style.background=SC[d.status]||'#888';
+  document.getElementById('topbar-bread').textContent=`${id}${d.location?' · '+d.location:''}`;
+  document.getElementById('ai-welcome').textContent=t('aiWelcome');
+}
+function deleteDep(id){
+  if(Object.keys(deps).length<=1){alert(t('errMin'));return;}
+  if(!confirm(t('errDel')(id))) return;
+  delete deps[id];
+  if(currentDep===id){const f=Object.keys(deps)[0];currentDep=null;switchDep(f);}
+  renderDepList();
+}
+
+// ── Save / Load ───────────────────────────────────────────────────────────────
+function saveCurrent(){
+  if(!currentDep||!deps[currentDep]) return;
+  const d=deps[currentDep];
+  ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
+    const el=document.querySelector(`[data-field="${f}"]`);if(el)d.charter[f]=el.value;
+  });
+  d.milestones=[...document.querySelectorAll('#ms-list .ms-row')].map(r=>({
+    name:r.querySelector('.ms-name-input')?.value||'',
+    date:r.querySelector('.ms-date-input')?.value||'',
+    sIdx:Math.max(0,t('msStatus').indexOf(r.querySelector('select')?.value)),
+    done:r.querySelector('.chk')?.classList.contains('done')||false,
+  }));
+  d.tracker=[...document.querySelectorAll('#tracker-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input,select');
+    return{item:ins[0]?.value||'',owner:ins[1]?.value||'',due:ins[2]?.value||'',
+           pIdx:Math.max(0,t('pOpts').indexOf(ins[3]?.value)),prog:parseInt(ins[4]?.value||'0'),
+           sIdx:Math.max(0,t('tStatus').indexOf(ins[5]?.value))};
+  });
+  const g=id=>{const el=document.getElementById(id);return el?el.value:''};
+  d.eod.date=g('eod-date');d.eod.reporter=g('eod-reporter');d.eod.weather=g('eod-weather');
+  d.eod.done=[...document.querySelectorAll('#eod-done-list .eod-txt')].map(s=>s.textContent);
+  d.eod.plan=[...document.querySelectorAll('#eod-plan-list .eod-txt')].map(s=>s.textContent);
+  d.eod.issues=[...document.querySelectorAll('#eod-issue-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input,select');
+    return{desc:ins[0]?.value||'',sevIdx:Math.max(0,t('sevOpts').indexOf(ins[1]?.value)),action:ins[2]?.value||'',statusIdx:Math.max(0,t('iStatus').indexOf(ins[3]?.value))};
+  });
+  d.risks=[...document.querySelectorAll('#risk-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input');const sels=tr.querySelectorAll('select');const badge=tr.querySelector('.rs');
+    return{desc:ins[0]?.value||'',cat:ins[1]?.value||'',prob:sels[0]?.value||'H',impact:sels[1]?.value||'H',
+           score:parseInt(badge?.textContent||'9'),mit:ins[2]?.value||'',owner:ins[3]?.value||'',
+           sIdx:Math.max(0,t('rStatus').indexOf(sels[2]?.value))};
+  });
+  d.issues=[...document.querySelectorAll('#issue-body tr')].map(tr=>{
+    const ins=tr.querySelectorAll('input,select');
+    return{desc:ins[0]?.value||'',date:ins[1]?.value||'',sevIdx:Math.max(0,t('sevOpts').indexOf(ins[2]?.value)),
+           impact:ins[3]?.value||'',action:ins[4]?.value||'',owner:ins[5]?.value||'',
+           statusIdx:Math.max(0,t('iStatus').indexOf(ins[6]?.value))};
+  });
+  d.retro.proj=g('retro-proj');d.retro.date=g('retro-date');
+  d.retro.rIdx=parseInt(document.getElementById('retro-result')?.value||'0');
+  d.retro.good=[...document.querySelectorAll('#retro-good .retro-item span')].map(s=>s.textContent);
+  d.retro.bad=[...document.querySelectorAll('#retro-bad .retro-item span')].map(s=>s.textContent);
+  d.retro.actions=[...document.querySelectorAll('#retro-action .retro-item span')].map(s=>s.textContent);
+}
+function loadDep(id){
+  const d=deps[id];
+  ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
+    const el=document.querySelector(`[data-field="${f}"]`);if(el)el.value=d.charter[f]||'';
+  });
+  renderMilestones(d.milestones);renderTracker(d.tracker);
+  document.getElementById('eod-date').value=d.eod.date;
+  document.getElementById('eod-reporter').value=d.eod.reporter;
+  document.getElementById('eod-weather').value=d.eod.weather;
+  renderEodList('done',d.eod.done);renderEodList('plan',d.eod.plan);renderEodIssues(d.eod.issues);
+  renderRisks(d.risks);renderIssues(d.issues);
+  document.getElementById('retro-proj').value=d.retro.proj;
+  document.getElementById('retro-date').value=d.retro.date;
+  document.getElementById('retro-result').value=String(d.retro.rIdx||0);
+  renderRetroCol('good',d.retro.good);renderRetroCol('bad',d.retro.bad);renderRetroCol('action',d.retro.actions);
+  updateTrackerStats();updateRiskBadge();updateDashboard();
+}
+function syncField(el){if(!currentDep)return;deps[currentDep].charter[el.dataset.field]=el.value;}
+function renderDynamic(){
+  if(!currentDep)return;
+  const d=deps[currentDep];
+  renderMilestones(d.milestones);renderTracker(d.tracker);
+  renderEodIssues(d.eod.issues);renderRisks(d.risks);renderIssues(d.issues);
+  updateTrackerStats();updateRiskBadge();updateDashboard();
+}
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+function msStatusOpts(cur){return t('msStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function tStatusOpts(cur){return t('tStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function rStatusOpts(cur){return t('rStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function iStatusOpts(cur){return t('iStatus').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function sevOpts(cur){return t('sevOpts').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function pOpts(cur){return t('pOpts').map((s,i)=>`<option${i===cur?' selected':''}>${s}</option>`).join('');}
+function pilClass(status){
+  const s=status.toLowerCase();
+  if(['done','完成','closed','關閉','full delivery','全數達成'].some(v=>s.includes(v)))return'pill-green';
+  if(['in progress','進行中','monitoring','監控中','partial','部分'].some(v=>s.includes(v)))return'pill-amber';
+  if(['delayed','延遲','open','開啟','critical','緊急','high','高','p1','p2','not delivered','未達成'].some(v=>s.includes(v)))return'pill-red';
+  if(['pending','待','planning','規劃'].some(v=>s.includes(v)))return'pill-gray';
+  return'pill-blue';
+}
+
+function renderMilestones(mss){
+  document.getElementById('ms-list').innerHTML=mss.map(m=>`
+    <div class="ms-row">
+      <div class="chk${m.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
+      <div style="flex:1"><input class="ms-name-input ie" value="${escH(m.name)}" style="font-size:13px;font-weight:500" placeholder="${t('addMs')}"></div>
+      <input class="ms-date-input ie" type="date" value="${m.date||''}" style="font-size:11px;color:var(--text3);width:115px;font-family:var(--mono)">
+      <select class="ie" style="font-size:11px;color:var(--text3);width:72px">${msStatusOpts(m.sIdx||0)}</select>
+    </div>`).join('');
+}
+function renderTracker(rows){
+  document.getElementById('tracker-body').innerHTML=rows.map((r,i)=>{
+    const prog=r.prog||0;const sc=prog>=100?'#3B6D11':prog>=50?'#854F0B':'#888';
+    return`<tr>
+      <td style="font-family:var(--mono);color:var(--text3);font-size:10px">${String(i+1).padStart(2,'0')}</td>
+      <td><input class="ie" value="${escH(r.item||'')}" placeholder="${t('thCommitment')}"></td>
+      <td><input class="ie" value="${escH(r.owner||'')}"></td>
+      <td><input class="ie" type="date" value="${r.due||''}" style="font-family:var(--mono);font-size:11px"></td>
+      <td><select class="ie" style="font-size:11px">${pOpts(r.pIdx||3)}</select></td>
+      <td>
+        <div class="prog-wrap">
+          <div class="prog-bar"><div class="prog-fill" style="width:${prog}%;background:${sc}"></div></div>
+          <input type="number" class="ie prog-num" min="0" max="100" value="${prog}" style="width:34px;text-align:right;font-size:10px;color:var(--text3)" onchange="this.previousElementSibling&&(this.previousElementSibling.firstElementChild.style.width=Math.min(100,Math.max(0,parseInt(this.value)||0))+'%')">%
+        </div>
+      </td>
+      <td><select class="ie" style="font-size:11px" onchange="updateTrackerStats()">${tStatusOpts(r.sIdx||0)}</select></td>
+    </tr>`;
+  }).join('');
+  updateTrackerStats();
+}
+function renderEodList(type,items){
+  document.getElementById(`eod-${type}-list`).innerHTML=items.map(v=>`
+    <div class="eod-item">
+      <div class="chk" style="width:15px;height:15px;flex-shrink:0" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div>
+      <span class="eod-txt" style="flex:1">${escH(v)}</span>
+      <i class="ti ti-x" style="font-size:12px;cursor:pointer;color:var(--text3)" onclick="this.parentElement.remove()" aria-hidden="true"></i>
+    </div>`).join('');
+}
+function renderEodIssues(issues){
+  document.getElementById('eod-issue-body').innerHTML=issues.map(r=>`
+    <tr><td><input class="ie" value="${escH(r.desc||'')}"></td>
+    <td><select class="ie">${sevOpts(r.sevIdx||2)}</select></td>
+    <td><input class="ie" value="${escH(r.action||'')}"></td>
+    <td><select class="ie">${iStatusOpts(r.statusIdx||0)}</select></td></tr>`).join('');
+}
+function renderRisks(risks){
+  riskCount=risks.length;
+  document.getElementById('risk-body').innerHTML=risks.map((r,i)=>{
+    const sc=r.score||9;const cls=sc>=6?'style="background:var(--red-light);color:var(--red)"':sc>=3?'style="background:var(--amber-light);color:#854F0B"':'style="background:var(--green-light);color:var(--green)"';
+    return`<tr>
+      <td style="font-family:var(--mono);color:var(--text3);font-size:10px">R${String(i+1).padStart(2,'0')}</td>
+      <td><input class="ie" value="${escH(r.desc||'')}"></td>
+      <td><input class="ie" value="${escH(r.cat||'')}"></td>
+      <td><select class="ie" onchange="calcRisk(this)"><option${r.prob==='H'?' selected':''}>H</option><option${r.prob==='M'?' selected':''}>M</option><option${r.prob==='L'?' selected':''}>L</option></select></td>
+      <td><select class="ie" onchange="calcRisk(this)"><option${r.impact==='H'?' selected':''}>H</option><option${r.impact==='M'?' selected':''}>M</option><option${r.impact==='L'?' selected':''}>L</option></select></td>
+      <td><span class="rs" ${cls}>${sc}</span></td>
+      <td><input class="ie" value="${escH(r.mit||'')}"></td>
+      <td><input class="ie" value="${escH(r.owner||'')}"></td>
+      <td><select class="ie">${rStatusOpts(r.sIdx||0)}</select></td></tr>`;
+  }).join('');
+  updateRiskBadge();
+}
+function renderIssues(issues){
+  issueCount=issues.length;
+  document.getElementById('issue-body').innerHTML=issues.map((r,i)=>`
+    <tr>
+      <td style="font-family:var(--mono);color:var(--text3);font-size:10px">I${String(i+1).padStart(2,'0')}</td>
+      <td><input class="ie" value="${escH(r.desc||'')}"></td>
+      <td><input class="ie" type="date" value="${r.date||''}" style="font-family:var(--mono);font-size:11px"></td>
+      <td><select class="ie">${sevOpts(r.sevIdx||2)}</select></td>
+      <td><input class="ie" value="${escH(r.impact||'')}"></td>
+      <td><input class="ie" value="${escH(r.action||'')}"></td>
+      <td><input class="ie" value="${escH(r.owner||'')}"></td>
+      <td><select class="ie">${iStatusOpts(r.statusIdx||0)}</select></td></tr>`).join('');
+}
+function renderRetroCol(type,items){
+  const m={good:'retro-good',bad:'retro-bad',action:'retro-action'};
+  document.getElementById(m[type]).innerHTML=items.map(v=>`
+    <div class="retro-item">
+      <i class="ti ti-circle-dot" style="font-size:11px;flex-shrink:0;margin-top:2px;color:var(--text3)" aria-hidden="true"></i>
+      <span style="flex:1">${escH(v)}</span>
+      <i class="ti ti-x" style="font-size:11px;cursor:pointer;color:var(--text3)" onclick="this.parentElement.remove()" aria-hidden="true"></i>
+    </div>`).join('');
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function updateDashboard(){
+  if(!currentDep) return;
+  saveCurrent();const d=deps[currentDep];
+  const rows=d.tracker;
+  const dn=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[2]).length;
+  const ip=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[1]).length;
+  const dl=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[3]).length;
+  document.getElementById('dash-commit-num').textContent=rows.length;
+  document.getElementById('dash-commit-sub').textContent=`${dn} ${t('done')} · ${ip} ${t('inprog')}`;
+  document.getElementById('dash-delayed-badge').textContent=dl?`${dl} ${t('delayed')}`:'';
+  const highRisks=d.risks.filter(r=>r.score>=6).length;
+  document.getElementById('dash-risk-num').textContent=d.risks.filter(r=>t('rStatus')[r.sIdx||0]===t('rStatus')[0]).length;
+  document.getElementById('dash-risk-sub').textContent=`${highRisks} score ≥6`;
+  document.getElementById('dash-risk-badge').textContent=highRisks?`${highRisks} high`:'';
+  const msDone=d.milestones.filter(m=>m.done).length;
+  document.getElementById('dash-ms-num').textContent=d.milestones.length;
+  document.getElementById('dash-ms-sub').textContent=`${msDone} ${t('done')}`;
+  document.getElementById('dash-ms-badge').textContent=`${msDone}/${d.milestones.length}`;
+  document.getElementById('dash-pm-name').textContent=d.charter.pm||'—';
+  document.getElementById('dash-location-sub').textContent=d.charter.location||d.location||'—';
+  // Risk mini list
+  document.getElementById('dash-risk-list').innerHTML=d.risks.slice(0,4).map(r=>{
+    const sc=r.score||9;const cls=sc>=6?'style="background:var(--red-light);color:var(--red)"':sc>=3?'style="background:var(--amber-light);color:#854F0B"':'style="background:var(--green-light);color:var(--green)"';
+    const st=t('rStatus')[r.sIdx||0];
+    return`<div class="risk-item">
+      <span class="rs" ${cls}>${sc}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(r.desc)}</div><div style="font-size:10px;color:var(--text3)">${escH(r.cat)} · ${escH(r.owner)}</div></div>
+      <span class="pill ${pilClass(st)}">${st}</span>
+    </div>`;
+  }).join('')||`<div style="font-size:12px;color:var(--text3);padding:8px 0">No risks logged</div>`;
+  // Milestones mini list
+  document.getElementById('dash-ms-list').innerHTML=d.milestones.slice(0,5).map(m=>{
+    const st=t('msStatus')[m.sIdx||0];
+    const dotColor=m.done?'var(--green)':m.sIdx===1?'var(--amber)':'var(--border2)';
+    return`<div class="ms-item">
+      <div class="ms-pip" style="border-color:${dotColor};background:${m.done?'var(--green)':'transparent'}"></div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:500">${escH(m.name)}</div>${m.date?`<div style="font-size:10px;color:var(--text3);font-family:var(--mono)">${m.date}</div>`:''}</div>
+      <span class="pill ${pilClass(m.done?'done':st)}">${m.done?t('msStatus')[2]:st}</span>
+    </div>`;
+  }).join('')||`<div style="font-size:12px;color:var(--text3);padding:8px 0">No milestones set</div>`;
+}
+
+// ── Stats / badges ────────────────────────────────────────────────────────────
+function updateTrackerStats(){
+  const rows=document.querySelectorAll('#tracker-body tr');
+  let dn=0,ip=0,dl=0;
+  rows.forEach(r=>{const s=r.querySelector('select:last-of-type');if(!s)return;
+    const v=s.value;if(v===t('tStatus')[2])dn++;else if(v===t('tStatus')[1])ip++;else if(v===t('tStatus')[3])dl++;
+  });
+  document.getElementById('t-total').textContent=rows.length;
+  document.getElementById('t-done').textContent=dn;
+  document.getElementById('t-inprog').textContent=ip;
+  document.getElementById('t-delayed').textContent=dl;
+  const b=document.getElementById('badge-delayed');b.style.display=dl>0?'inline':'none';b.textContent=dl;
+}
+function updateRiskBadge(){
+  const h=[...document.querySelectorAll('#risk-body .rs')].filter(b=>parseInt(b.textContent)>=6).length;
+  const b=document.getElementById('badge-risk');b.style.display=h>0?'inline':'none';b.textContent=h;
+}
+function calcRisk(sel){
+  const tr=sel.closest('tr');const sels=tr.querySelectorAll('select');
+  const m={H:3,M:2,L:1};const sc=(m[sels[0].value]||3)*(m[sels[1].value]||3);
+  const badge=tr.querySelector('.rs');if(!badge)return;
+  badge.textContent=sc;
+  if(sc>=6)badge.setAttribute('style','background:var(--red-light);color:var(--red)');
+  else if(sc>=3)badge.setAttribute('style','background:var(--amber-light);color:#854F0B');
+  else badge.setAttribute('style','background:var(--green-light);color:var(--green)');
+  updateRiskBadge();
+}
+
+// ── Mutators ──────────────────────────────────────────────────────────────────
+function toggleChk(el){el.classList.toggle('done');}
+function addMs(){
+  const d=document.createElement('div');d.className='ms-row';
+  d.innerHTML=`<div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ms-name-input ie" style="font-size:13px;font-weight:500" placeholder="${t('addMs')}"></div><input class="ms-date-input ie" type="date" style="font-size:11px;color:var(--text3);width:115px;font-family:var(--mono)"><select class="ie" style="font-size:11px;color:var(--text3);width:72px">${msStatusOpts(0)}</select>`;
+  document.getElementById('ms-list').appendChild(d);
+}
+function addTrackerRow(){
+  const n=document.querySelectorAll('#tracker-body tr').length+1;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:var(--mono);color:var(--text3);font-size:10px">${String(n).padStart(2,'0')}</td><td><input class="ie" placeholder="${t('thCommitment')}"></td><td><input class="ie"></td><td><input class="ie" type="date" style="font-family:var(--mono);font-size:11px"></td><td><select class="ie" style="font-size:11px">${pOpts(3)}</select></td><td><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:0%;background:#888"></div></div><input type="number" class="ie prog-num" min="0" max="100" value="0" style="width:34px;text-align:right;font-size:10px;color:var(--text3)" onchange="this.previousElementSibling&&(this.previousElementSibling.firstElementChild.style.width=Math.min(100,Math.max(0,parseInt(this.value)||0))+'%')">%</div></td><td><select class="ie" style="font-size:11px" onchange="updateTrackerStats()">${tStatusOpts(0)}</select></td>`;
+  document.getElementById('tracker-body').appendChild(tr);updateTrackerStats();
+}
+function addEodItem(type){
+  const inp=document.getElementById(`eod-${type}-in`);const val=inp.value.trim();if(!val)return;
+  const list=document.getElementById(`eod-${type}-list`);
+  const div=document.createElement('div');div.className='eod-item';
+  div.innerHTML=`<div class="chk" style="width:15px;height:15px;flex-shrink:0" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><span class="eod-txt" style="flex:1">${escH(val)}</span><i class="ti ti-x" style="font-size:12px;cursor:pointer;color:var(--text3)" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
+  list.appendChild(div);inp.value='';
+}
+function addEodIssue(){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="ie"></td><td><select class="ie">${sevOpts(2)}</select></td><td><input class="ie"></td><td><select class="ie">${iStatusOpts(0)}</select></td>`;
+  document.getElementById('eod-issue-body').appendChild(tr);
+}
+function addRiskRow(){
+  riskCount++;const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:var(--mono);color:var(--text3);font-size:10px">R${String(riskCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><select class="ie" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><span class="rs" style="background:var(--red-light);color:var(--red)">9</span></td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie">${rStatusOpts(0)}</select></td>`;
+  document.getElementById('risk-body').appendChild(tr);updateRiskBadge();
+}
+function addIssueRow(){
+  issueCount++;const today=new Date().toISOString().slice(0,10);const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:var(--mono);color:var(--text3);font-size:10px">I${String(issueCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie" type="date" value="${today}" style="font-family:var(--mono);font-size:11px"></td><td><select class="ie">${sevOpts(2)}</select></td><td><input class="ie"></td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie">${iStatusOpts(0)}</select></td>`;
+  document.getElementById('issue-body').appendChild(tr);
+}
+function addRetro(type){
+  const m={good:'r-good-in',bad:'r-bad-in',action:'r-action-in'};
+  const inp=document.getElementById(m[type]);const val=inp.value.trim();if(!val)return;
+  const lm={good:'retro-good',bad:'retro-bad',action:'retro-action'};
+  const div=document.createElement('div');div.className='retro-item';
+  div.innerHTML=`<i class="ti ti-circle-dot" style="font-size:11px;flex-shrink:0;margin-top:2px;color:var(--text3)" aria-hidden="true"></i><span style="flex:1">${escH(val)}</span><i class="ti ti-x" style="font-size:11px;cursor:pointer;color:var(--text3)" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
+  document.getElementById(lm[type]).appendChild(div);inp.value='';
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function switchTool(id,el){
+  if(currentDep) saveCurrent();
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item,.sb-btn').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el){el.classList.add('active');}
+  document.querySelectorAll(`.nav-item`).forEach(n=>{if(n.onclick&&n.onclick.toString().includes(`'${id}'`))n.classList.add('active');});
+  document.querySelectorAll(`.sb-btn`).forEach(n=>{if(n.onclick&&n.onclick.toString().includes(`'${id}'`))n.classList.add('active');});
+  currentTool=id;
+  const info=t('pageInfo')[id]||{title:id,sub:''};
+  document.getElementById('topbar-title').textContent=info.title;
+  if(id==='dashboard'){updateDashboard();}
+  renderQuickBtns();
+}
+function updatePageInfo(){
+  const info=t('pageInfo')[currentTool]||{title:currentTool,sub:''};
+  document.getElementById('topbar-title').textContent=info.title;
+}
+
+// ── AI ────────────────────────────────────────────────────────────────────────
+function renderQuickBtns(){
+  const cmds=t('quick')[currentTool]||[];
+  document.getElementById('ai-qbs').innerHTML=cmds.map(c=>`<div class="ai-qb" onclick="sendAI('${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
+}
+function toggleAI(){
+  aiOpen=!aiOpen;
+  document.getElementById('ai-panel').classList.toggle('open',aiOpen);
+  document.getElementById('cw').classList.toggle('ai-open',aiOpen);
+  if(aiOpen)renderQuickBtns();
+}
+function addAIMsg(cls,text){
+  const msgs=document.getElementById('ai-msgs');
+  const d=document.createElement('div');d.className=`ai-msg ${cls}`;
+  d.innerHTML=text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;
+}
+async function sendAI(msg){
+  const inp=document.getElementById('ai-inp');
+  const text=msg||inp.value.trim();if(!text)return;
+  inp.value='';if(!aiOpen)toggleAI();
+  addAIMsg('u',text);
+  const ld=addAIMsg('a',lang==='zh'?'分析中…':'Thinking…');
+  ld.style.fontStyle='italic';ld.style.color='var(--text3)';
+  if(currentDep)saveCurrent();
+  const ctx={dep:currentDep,tool:currentTool,lang,data:currentDep?deps[currentDep]:{}};
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:`You are a PM AI Agent for Valtec UAV maritime deployments. Reply in ${lang==='zh'?'Traditional Chinese':'English'}. Be direct, professional, and specific. You have access to all project data.`,messages:[{role:'user',content:`Tool: ${currentTool}\nData: ${JSON.stringify(ctx,null,1)}\n\nRequest: ${text}`}]})});
+    const data=await res.json();
+    ld.style.fontStyle='';ld.style.color='';
+    ld.innerHTML=(data.content?.[0]?.text||'No response').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  }catch(e){ld.style.fontStyle='';ld.textContent=`Error: ${e.message}`;}
+  document.getElementById('ai-msgs').scrollTop=99999;
+}
+
+// ── Slack ─────────────────────────────────────────────────────────────────────
+function buildSlackMsg(tool){
+  if(!currentDep)return'';
+  saveCurrent();const d=deps[currentDep];const today=new Date().toLocaleDateString();
+  if(tool==='charter'){
+    const ms=d.milestones.map(m=>`${m.done?'✅':'⬜'} ${m.name} — ${t('msStatus')[m.sIdx||0]}`).join('\n');
+    return`📋 *Charter — ${d.charter.name||d.id}*\nClient: ${d.charter.client||'—'} | Vessel: ${d.charter.vessel||'—'} | PM: ${d.charter.pm||'—'}\n\n*Objective:*\n${d.charter.goal||'—'}\n\n*Milestones:*\n${ms||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
+  }
+  if(tool==='tracker'){
+    const rows=d.tracker;
+    const dn=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[2]).length;
+    const ip=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[1]).length;
+    const dl=rows.filter(r=>t('tStatus')[r.sIdx||0]===t('tStatus')[3]);
+    let body=`✅ Done: ${dn}  🔄 In progress: ${ip}  ⚠️ Delayed: ${dl.length}  Total: ${rows.length}`;
+    if(dl.length)body+='\n\n*Delayed items:*\n'+dl.map(r=>`• ${r.item} — ${r.owner}`).join('\n');
+    return`✅ *Tracker — ${d.id}* _(${today})_\n\n${body}\n\n_Valtec PM Toolkit_`;
+  }
+  if(tool==='eod'){
+    return`📋 *EOD Report — ${d.id}* | ${d.eod.date} | Reporter: ${d.eod.reporter||'—'}\n\n*✅ Completed:*\n${d.eod.done.map(v=>`• ${v}`).join('\n')||'—'}\n\n*📅 Tomorrow:*\n${d.eod.plan.map(v=>`• ${v}`).join('\n')||'—'}\n\n*⚠️ Issues:*\n${d.eod.issues.length?d.eod.issues.map(r=>`• [${t('sevOpts')[r.sevIdx||2]}] ${r.desc} — ${r.action}`).join('\n'):'None'}\n\n_Valtec PM Toolkit_`;
+  }
+  if(tool==='risk'){
+    const rs=d.risks.map(r=>`${r.score>=6?'🔴':r.score>=3?'🟡':'🟢'} *${r.desc}* (${r.prob}×${r.impact}=${r.score}) — ${r.mit}`).join('\n');
+    return`⚠️ *Risk Log — ${d.id}* _(${today})_\n\n${rs||'No risks logged'}\n\n_Valtec PM Toolkit_`;
+  }
+  if(tool==='retro'){
+    const outcomes=['Full delivery','Partial delivery','Not delivered'];
+    return`🔁 *Retrospective — ${d.retro.proj||d.id}*\nOutcome: *${outcomes[d.retro.rIdx||0]}*\n\n*👍 What went well:*\n${d.retro.good.map(v=>`• ${v}`).join('\n')||'—'}\n\n*👎 Needs improvement:*\n${d.retro.bad.map(v=>`• ${v}`).join('\n')||'—'}\n\n*⚡ Action items:*\n${d.retro.actions.map(v=>`• ${v}`).join('\n')||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
+  }
+  const all=`📊 *Project Update — ${d.id}*\nClient: ${d.charter.client||'—'} | Location: ${d.charter.location||'—'} | PM: ${d.charter.pm||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
+  return all;
+}
+async function slackSend(tool){
+  const tk=tool||currentTool;const msg=buildSlackMsg(tk);if(!msg)return;
+  if(SLACK_WEBHOOK){
+    try{
+      await fetch(SLACK_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msg})});
+      showToast(t('toastSent'));
+    }catch(e){showToast('Send failed: '+e.message);}
+  } else {
+    // Fallback: copy to clipboard
+    navigator.clipboard?.writeText(msg).then(()=>showToast('Copied to clipboard — paste into Slack')).catch(()=>showToast('Set SLACK_WEBHOOK in the code to send directly'));
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function showModal(){document.getElementById('ndm').classList.add('show');}
+function hideModal(){
+  document.getElementById('ndm').classList.remove('show');
+  ['ndm-id','ndm-client','ndm-vessel','ndm-location'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ndm-status').value='planning';
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg){
+  const el=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function init(){
+  deps['DLY007']=newDepData('DLY007','LungSoon Ocean Group','PJ8','Majuro, Marshall Islands','active');
+  deps['DLY007'].charter.pm='Mia Lin';
+  deps['DLY007'].charter.name='DLY007 Majuro Deployment';
+  deps['DLY007'].charter.goal='Complete UAV equipment pre-positioning and MARLIN GCS setup aboard PJ8. Ensure all systems are operational and crew are trained before fish detection services go live.';
+  deps['DLY007'].tracker=[
+    {item:'Confirm Jack flight booking',owner:'PM',due:'2026-06-10',pIdx:3,prog:100,sIdx:2},
+    {item:'Equipment customs clearance docs',owner:'PM',due:'2026-06-15',pIdx:0,prog:60,sIdx:1},
+    {item:'GCS software update v2.4',owner:'Jack',due:'2026-06-12',pIdx:1,prog:20,sIdx:0},
+    {item:'Client SPOC confirmation — Chih',owner:'Mia / Iris',due:'2026-06-08',pIdx:0,prog:40,sIdx:3},
+  ];
+  applyI18n();
+  renderDepList();
+  switchDep('DLY007');
+  updatePageInfo();
+  renderQuickBtns();
+  document.getElementById('ai-welcome').textContent=t('aiWelcome');
+  document.getElementById('ai-inp').placeholder=t('aiPh');
+}
+
+// Auto-init if already authenticated
+if(!document.getElementById('app').classList.contains('hidden')) init();
+</script>
 </body>
 </html>
