@@ -32,7 +32,7 @@ const T = {
     export:'Export', send:'Send', reviewSend:'Review & Send', addRow:'Add', cancel:'Cancel', create:'Create',
     charterInfo:'Project Info', milestones:'Milestones', addMs:'Add milestone',
     fName:'Project Name', fId:'Project ID', fClient:'Client', fVessel:'Vessel', fLocation:'Location',
-    fPm:'Project Manager', fStart:'Estimated Deployment Start Date', fEnd:'Estimated Acceptance Date', fGoal:'Objective', fSuccess:'Success Criteria (one per line)', fDetail:'Detailed Information',
+    fPm:'Project Manager', fContact:'Client Contact Window', fStart:'Estimated Deployment Start Date', fEnd:'Estimated Acceptance Date', fGoal:'Objective', fSuccess:'Success Criteria (one per line)', fDetail:'Detailed Information',
     depStatusLabel:'Deployment Status',
     total:'Total', done:'Done', inprog:'In Progress', delayed:'Delayed',
     thCommitment:'Commitment', thOwner:'Owner', thDue:'Due Date', thStatus:'Status', thNote:'Note',
@@ -91,7 +91,7 @@ const T = {
     export:'匯出', send:'發送', reviewSend:'確認並發送', addRow:'新增', cancel:'取消', create:'建立',
     charterInfo:'專案基本資訊', milestones:'里程碑', addMs:'新增里程碑',
     fName:'專案名稱', fId:'專案編號', fClient:'客戶', fVessel:'船隻', fLocation:'作業地點',
-    fPm:'專案經理', fStart:'預計部署開始日期', fEnd:'預計驗收日期', fGoal:'主要目標', fSuccess:'成功標準（每行一條）', fDetail:'詳細資訊',
+    fPm:'專案經理', fContact:'客戶聯絡窗口', fStart:'預計部署開始日期', fEnd:'預計驗收日期', fGoal:'主要目標', fSuccess:'成功標準（每行一條）', fDetail:'詳細資訊',
     depStatusLabel:'部署狀態',
     total:'總計', done:'完成', inprog:'進行中', delayed:'延遲',
     thCommitment:'承諾事項', thOwner:'負責人', thDue:'截止日', thStatus:'狀態', thNote:'備註',
@@ -218,7 +218,7 @@ function renderDynamic() {
 function newDepData(id, client, vessel, location, status) {
   return {
     id, client, vessel, location, status,
-    charter: {name:'', id, client, vessel, location, pm:'', start:'', end:'', goal:'', success:'', detail:''},
+    charter: {name:'', id, client, vessel, location, pm:'', contact:'', start:'', end:'', goal:'', success:'', detail:''},
     milestones: [
       {name:'T-30', date:'', sIdx:0, done:false},
       {name:'T-14', date:'', sIdx:0, done:false},
@@ -290,7 +290,7 @@ function deleteDep(id) {
 function saveCurrent() {
   if(!currentDep||!deps[currentDep]) return;
   const d = deps[currentDep];
-  ['name','id','client','vessel','location','pm','start','end','goal','success','detail'].forEach(f=>{
+  ['name','id','client','vessel','location','pm','contact','start','end','goal','success','detail'].forEach(f=>{
     const el=document.querySelector(`[data-field="${f}"]`); if(el) d.charter[f]=el.value;
   });
   d.milestones = [...document.querySelectorAll('#ms-list .ms-row')].map(r=>({
@@ -328,7 +328,7 @@ function saveCurrent() {
 
 function loadDep(id) {
   const d=deps[id];
-  ['name','id','client','vessel','location','pm','start','end','goal','success','detail'].forEach(f=>{
+  ['name','id','client','vessel','location','pm','contact','start','end','goal','success','detail'].forEach(f=>{
     const el=document.querySelector(`[data-field="${f}"]`); if(el) el.value=d.charter[f]||'';
   });
   const statusEl=document.querySelector('[data-field="status"]');
