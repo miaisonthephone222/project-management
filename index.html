@@ -374,6 +374,9 @@ tr:hover td{background:var(--surface2)}
           <div class="sec" data-i18n="milestones">Milestones</div>
           <div id="ms-list"></div>
           <div class="add-row" onclick="addMs()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addMs">Add milestone</span></div>
+          <div class="sec" data-i18n="stakeholders">Stakeholders</div>
+          <div id="sh-list"></div>
+          <div class="add-row" onclick="addStakeholder()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addStakeholder">Add stakeholder</span></div>
           <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackKickoff">Kick-off notice</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('charter')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
         </div>
 
@@ -546,6 +549,8 @@ const T={
     slackTokenNote:'Paste your Slack bot OAuth token (xoxb-…). Stored locally in your browser.',
     slackTokenSet:'✓ Token saved',toastNoToken:'Add your Slack bot token in Settings first',
     charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',
+    stakeholders:'Stakeholders',addStakeholder:'Add stakeholder',
+    shName:'Name',shRole:'Role',shContact:'Contact',shNotified:'Notified',
     fName:'Project name',fId:'Project ID',fClient:'Client',fVessel:'Vessel',fLocation:'Location',
     fPm:'Project manager',fStart:'Start date',fEnd:'End date',fGoal:'Objective',fSuccess:'Success criteria (one per line)',
     total:'Total',done:'Done',inprog:'In progress',delayed:'Delayed',
@@ -593,6 +598,8 @@ const T={
     slackTokenNote:'貼上 Slack Bot OAuth Token（xoxb-…），儲存於瀏覽器本地。',
     slackTokenSet:'✓ 已儲存',toastNoToken:'請先在設定中新增 Slack Bot Token',
     charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',
+    stakeholders:'聯絡窗口',addStakeholder:'新增窗口',
+    shName:'姓名',shRole:'角色',shContact:'聯絡方式',shNotified:'已通知',
     fName:'專案名稱',fId:'專案編號',fClient:'客戶',fVessel:'船隻',fLocation:'作業地點',
     fPm:'專案經理',fStart:'起始日',fEnd:'結束日',fGoal:'主要目標',fSuccess:'成功標準（每行一條）',
     total:'總計',done:'完成',inprog:'進行中',delayed:'延遲',
@@ -658,7 +665,7 @@ const SC={planning:'#E8A020',active:'#3B6D11',done:'#888780'};
 function newDepData(id,client,vessel,location,status){
   return{
     id,client,vessel,location,status,
-    charter:{name:'',id,client,vessel,location,pm:'',start:'',end:'',goal:'',success:''},
+    charter:{name:'',id,client,vessel,location,pm:'',start:'',end:'',goal:'',success:'',stakeholders:[]},
     milestones:[
       {name:'T-30 — Requirements & equipment list frozen',date:'',sIdx:0,done:false},
       {name:'T-14 — Equipment ready & shipped',date:'',sIdx:0,done:false},
@@ -738,6 +745,11 @@ function saveCurrent(){
     sIdx:Math.max(0,t('msStatus').indexOf(r.querySelector('select')?.value)),
     done:r.querySelector('.chk')?.classList.contains('done')||false,
   }));
+  d.charter.stakeholders=[...document.querySelectorAll('#sh-list .sh-row')].map(r=>{
+    const ins=r.querySelectorAll('input');
+    return{name:ins[0]?.value||'',role:ins[1]?.value||'',contact:ins[2]?.value||'',
+           notified:r.querySelector('.chk')?.classList.contains('done')||false};
+  });
   d.tracker=[...document.querySelectorAll('#tracker-body tr')].map(tr=>{
     const ins=tr.querySelectorAll('input,select');
     return{item:ins[0]?.value||'',owner:ins[1]?.value||'',due:ins[2]?.value||'',
@@ -775,7 +787,7 @@ function loadDep(id){
   ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
     const el=document.querySelector(`[data-field="${f}"]`);if(el)el.value=d.charter[f]||'';
   });
-  renderMilestones(d.milestones);renderTracker(d.tracker);
+  renderMilestones(d.milestones);renderStakeholders(d.charter.stakeholders||[]);renderTracker(d.tracker);
   document.getElementById('eod-date').value=d.eod.date;
   document.getElementById('eod-reporter').value=d.eod.reporter;
   document.getElementById('eod-weather').value=d.eod.weather;
@@ -791,7 +803,7 @@ function syncField(el){if(!currentDep)return;deps[currentDep].charter[el.dataset
 function renderDynamic(){
   if(!currentDep)return;
   const d=deps[currentDep];
-  renderMilestones(d.milestones);renderTracker(d.tracker);
+  renderMilestones(d.milestones);renderStakeholders(d.charter.stakeholders||[]);renderTracker(d.tracker);
   renderEodIssues(d.eod.issues);renderRisks(d.risks);renderIssues(d.issues);
   updateTrackerStats();updateRiskBadge();updateDashboard();
 }
@@ -820,6 +832,24 @@ function renderMilestones(mss){
       <input class="ms-date-input ie" type="date" value="${m.date||''}" style="font-size:11px;color:var(--text3);width:115px;font-family:var(--mono)">
       <select class="ie" style="font-size:11px;color:var(--text3);width:72px">${msStatusOpts(m.sIdx||0)}</select>
     </div>`).join('');
+}
+function renderStakeholders(arr){
+  document.getElementById('sh-list').innerHTML=(arr||[]).map(s=>`
+    <div class="ms-row sh-row">
+      <div class="chk${s.notified?' done':''}" onclick="toggleChk(this)" title="${t('shNotified')}"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
+      <input class="ie" value="${escH(s.name)}" placeholder="${t('shName')}" style="flex:2;min-width:0;font-size:13px;font-weight:500">
+      <input class="ie" value="${escH(s.role)}" placeholder="${t('shRole')}" style="flex:1;min-width:0;font-size:12px">
+      <input class="ie" value="${escH(s.contact)}" placeholder="${t('shContact')}" style="flex:1;min-width:0;font-size:12px">
+      <i class="ti ti-x" style="font-size:12px;cursor:pointer;color:var(--text3);flex-shrink:0" onclick="this.closest('.sh-row').remove()" aria-hidden="true"></i>
+    </div>`).join('');
+}
+function addStakeholder(){
+  if(!currentDep)return;
+  saveCurrent();
+  const sh=deps[currentDep].charter.stakeholders||(deps[currentDep].charter.stakeholders=[]);
+  sh.push({name:'',role:'',contact:'',notified:false});
+  renderStakeholders(sh);
+  document.querySelector('#sh-list .sh-row:last-child input')?.focus();
 }
 function renderTracker(rows){
   document.getElementById('tracker-body').innerHTML=rows.map((r,i)=>{
@@ -1072,7 +1102,8 @@ function buildSlackMsg(tool){
   saveCurrent();const d=deps[currentDep];const today=new Date().toLocaleDateString();
   if(tool==='charter'){
     const ms=d.milestones.map(m=>`${m.done?'✅':'⬜'} ${m.name} — ${t('msStatus')[m.sIdx||0]}`).join('\n');
-    return`📋 *Charter — ${d.charter.name||d.id}*\nClient: ${d.charter.client||'—'} | Vessel: ${d.charter.vessel||'—'} | PM: ${d.charter.pm||'—'}\n\n*Objective:*\n${d.charter.goal||'—'}\n\n*Milestones:*\n${ms||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
+    const sh=(d.charter.stakeholders||[]).map(s=>`${s.notified?'✅':'⬜'} ${s.name||'—'}${s.role?' ('+s.role+')':''}${s.contact?' — '+s.contact:''}`).join('\n');
+    return`📋 *Charter — ${d.charter.name||d.id}*\nClient: ${d.charter.client||'—'} | Vessel: ${d.charter.vessel||'—'} | PM: ${d.charter.pm||'—'}\n\n*Objective:*\n${d.charter.goal||'—'}\n\n*Milestones:*\n${ms||'—'}${sh?'\n\n*Stakeholders notified:*\n'+sh:''}\n\n_Valtec PM Toolkit · ${today}_`;
   }
   if(tool==='tracker'){
     const rows=d.tracker;
