@@ -560,7 +560,7 @@ const T={
       risk:{title:'Risk & Issue Log',sub:'Risk register + issue log'},
       retro:{title:'Retrospective',sub:'Project review — wins, improvements, actions'},
     },
-    toastSent:'Sent to #project-management',
+    toastSent:'Copied! Paste into #project-management',
     errNoId:'Please enter a project ID.',errDup:'This ID already exists.',errMin:'At least one deployment must remain.',
     errDel:(id)=>`Delete ${id}?`,errExport:'Export available for Tracker and Risk Log.',
   },
@@ -604,7 +604,7 @@ const T={
       risk:{title:'風險 & 問題紀錄',sub:'風險登錄 + 問題登錄'},
       retro:{title:'回顧',sub:'專案回顧'},
     },
-    toastSent:'已發送至 #project-management',
+    toastSent:'已複製！請貼至 #project-management',
     errNoId:'請填寫專案編號。',errDup:'此編號已存在。',errMin:'至少保留一個 Deployment。',
     errDel:(id)=>`確定刪除 ${id}？`,errExport:'目前支援 Tracker 和 Risk Log 匯出。',
   }
@@ -628,7 +628,6 @@ function applyI18n(){
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let deps={}, currentDep=null, currentTool='dashboard', aiOpen=false, riskCount=0, issueCount=0;
-const SLACK_WEBHOOK=''; // Add your Slack Incoming Webhook URL here
 const SLACK_CHANNEL_ID='C0BA2KNLDCY';
 const SC={planning:'#E8A020',active:'#3B6D11',done:'#888780'};
 
@@ -1074,16 +1073,12 @@ function buildSlackMsg(tool){
   const all=`📊 *Project Update — ${d.id}*\nClient: ${d.charter.client||'—'} | Location: ${d.charter.location||'—'} | PM: ${d.charter.pm||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
   return all;
 }
-async function slackSend(tool){
+function slackSend(tool){
   const tk=tool||currentTool;const msg=buildSlackMsg(tk);if(!msg)return;
-  if(SLACK_WEBHOOK){
-    try{
-      await fetch(SLACK_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msg})});
-      showToast(t('toastSent'));
-    }catch(e){showToast('Send failed: '+e.message);}
-  } else {
-    // Fallback: copy to clipboard
-    navigator.clipboard?.writeText(msg).then(()=>showToast('Copied to clipboard — paste into Slack')).catch(()=>showToast('Set SLACK_WEBHOOK in the code to send directly'));
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(()=>showToast(t('toastSent'))).catch(()=>{console.log(msg);showToast(t('toastSent'));});
+  }else{
+    console.log(msg);showToast(t('toastSent'));
   }
 }
 
