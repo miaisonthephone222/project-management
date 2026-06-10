@@ -268,7 +268,7 @@ tr:hover td{background:var(--surface2)}
     <div class="sb-btn" onclick="slackSend()"><i class="ti ti-brand-slack" aria-hidden="true"></i><span class="sb-tip">Send to Slack</span></div>
     <div class="sb-spacer"></div>
     <div class="sb-btn" onclick="toggleAI()"><i class="ti ti-sparkles" aria-hidden="true"></i><span class="sb-tip">AI Agent</span></div>
-    <div class="sb-btn"><i class="ti ti-settings" aria-hidden="true"></i><span class="sb-tip">Settings</span></div>
+    <div class="sb-btn" onclick="showSettings()"><i class="ti ti-settings" aria-hidden="true"></i><span class="sb-tip">Settings</span></div>
   </div>
 
   <!-- Nav panel -->
@@ -489,6 +489,24 @@ tr:hover td{background:var(--surface2)}
     </div>
   </div>
 
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal-card">
+      <div class="modal-title"><span data-i18n="settingsTitle">Settings</span><i class="ti ti-x" style="cursor:pointer;color:var(--text3);font-size:16px" onclick="hideSettings()" aria-label="Close"></i></div>
+      <div class="form-grid fg1" style="margin-bottom:8px">
+        <div class="field">
+          <label data-i18n="slackToken">Slack Bot Token</label>
+          <input id="slack-token-inp" type="password" data-i18n-ph="slackTokenPh" placeholder="xoxb-…">
+          <div id="slack-token-status" style="font-size:12px;color:var(--green);margin-top:4px"></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin:0 0 16px" data-i18n="slackTokenNote">Paste your Slack bot OAuth token. Stored locally in your browser.</p>
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="tbtn" onclick="hideSettings()" data-i18n="cancel">Cancel</button>
+        <button class="tbtn blue" onclick="saveSlackToken()"><i class="ti ti-device-floppy" aria-hidden="true"></i> <span data-i18n="save">Save</span></button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- end app -->
 
 <div class="toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toast-msg"></span></div>
@@ -523,7 +541,10 @@ const T={
   en:{
     depLabel:'Deployments',newDep:'New deployment',navTools:'Tools',
     toolDash:'Dashboard',toolCharter:'Charter',toolTracker:'Tracker',toolEod:'EOD Report',toolRisk:'Risk Log',toolRetro:'Retrospective',
-    send:'Send',addRow:'Add',cancel:'Cancel',create:'Create',viewAll:'View all',
+    send:'Send',addRow:'Add',cancel:'Cancel',create:'Create',save:'Save',viewAll:'View all',
+    settingsTitle:'Settings',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
+    slackTokenNote:'Paste your Slack bot OAuth token (xoxb-…). Stored locally in your browser.',
+    slackTokenSet:'✓ Token saved',toastNoToken:'Add your Slack bot token in Settings first',
     charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',
     fName:'Project name',fId:'Project ID',fClient:'Client',fVessel:'Vessel',fLocation:'Location',
     fPm:'Project manager',fStart:'Start date',fEnd:'End date',fGoal:'Objective',fSuccess:'Success criteria (one per line)',
@@ -560,14 +581,17 @@ const T={
       risk:{title:'Risk & Issue Log',sub:'Risk register + issue log'},
       retro:{title:'Retrospective',sub:'Project review — wins, improvements, actions'},
     },
-    toastSent:'Copied! Paste into #project-management',
+    toastSent:'Sent to #project-management ✓',
     errNoId:'Please enter a project ID.',errDup:'This ID already exists.',errMin:'At least one deployment must remain.',
     errDel:(id)=>`Delete ${id}?`,errExport:'Export available for Tracker and Risk Log.',
   },
   zh:{
     depLabel:'部署專案',newDep:'新增部署',navTools:'工具',
     toolDash:'總覽',toolCharter:'Charter',toolTracker:'Tracker',toolEod:'EOD 報告',toolRisk:'風險紀錄',toolRetro:'回顧',
-    send:'發送',addRow:'新增',cancel:'取消',create:'建立',viewAll:'查看全部',
+    send:'發送',addRow:'新增',cancel:'取消',create:'建立',save:'儲存',viewAll:'查看全部',
+    settingsTitle:'設定',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
+    slackTokenNote:'貼上 Slack Bot OAuth Token（xoxb-…），儲存於瀏覽器本地。',
+    slackTokenSet:'✓ 已儲存',toastNoToken:'請先在設定中新增 Slack Bot Token',
     charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',
     fName:'專案名稱',fId:'專案編號',fClient:'客戶',fVessel:'船隻',fLocation:'作業地點',
     fPm:'專案經理',fStart:'起始日',fEnd:'結束日',fGoal:'主要目標',fSuccess:'成功標準（每行一條）',
@@ -604,7 +628,7 @@ const T={
       risk:{title:'風險 & 問題紀錄',sub:'風險登錄 + 問題登錄'},
       retro:{title:'回顧',sub:'專案回顧'},
     },
-    toastSent:'已複製！請貼至 #project-management',
+    toastSent:'已發送至 #project-management ✓',
     errNoId:'請填寫專案編號。',errDup:'此編號已存在。',errMin:'至少保留一個 Deployment。',
     errDel:(id)=>`確定刪除 ${id}？`,errExport:'目前支援 Tracker 和 Risk Log 匯出。',
   }
@@ -1073,13 +1097,40 @@ function buildSlackMsg(tool){
   const all=`📊 *Project Update — ${d.id}*\nClient: ${d.charter.client||'—'} | Location: ${d.charter.location||'—'} | PM: ${d.charter.pm||'—'}\n\n_Valtec PM Toolkit · ${today}_`;
   return all;
 }
-function slackSend(tool){
+async function slackSend(tool){
   const tk=tool||currentTool;const msg=buildSlackMsg(tk);if(!msg)return;
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(msg).then(()=>showToast(t('toastSent'))).catch(()=>{console.log(msg);showToast(t('toastSent'));});
-  }else{
-    console.log(msg);showToast(t('toastSent'));
-  }
+  const token=localStorage.getItem('valtec_slack_token');
+  if(!token){showToast(t('toastNoToken'));return;}
+  try{
+    const res=await fetch('https://slack.com/api/chat.postMessage',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({channel:SLACK_CHANNEL_ID,text:msg})
+    });
+    const data=await res.json();
+    if(data.ok)showToast(t('toastSent'));
+    else showToast('Slack: '+(data.error||'error'));
+  }catch(e){showToast('Send failed: '+e.message);}
+}
+function showSettings(){
+  refreshSlackTokenUI();
+  document.getElementById('settings-modal').classList.add('show');
+}
+function hideSettings(){document.getElementById('settings-modal').classList.remove('show');}
+function saveSlackToken(){
+  const val=document.getElementById('slack-token-inp').value.trim();
+  if(val)localStorage.setItem('valtec_slack_token',val);else localStorage.removeItem('valtec_slack_token');
+  refreshSlackTokenUI();
+  hideSettings();
+  showToast(val?t('slackTokenSet'):t('cancel'));
+}
+function refreshSlackTokenUI(){
+  const token=localStorage.getItem('valtec_slack_token')||'';
+  const inp=document.getElementById('slack-token-inp');
+  const status=document.getElementById('slack-token-status');
+  if(!inp)return;
+  inp.value=token;
+  status.textContent=token?t('slackTokenSet'):'';
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
