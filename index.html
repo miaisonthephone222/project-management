@@ -126,6 +126,8 @@ tr:hover td{background:var(--surface2)}
 /* ── Inline edit ── */
 .ie{border:none;background:transparent;font-size:12px;color:var(--text);width:100%;font-family:var(--font);padding:0;outline:none;cursor:text}
 .ie:focus{background:var(--blue-light);border-radius:4px;padding:1px 4px}
+select.ie{padding-right:20px;cursor:pointer;-webkit-appearance:auto;appearance:auto}
+select.ie:focus{padding-right:20px;padding-left:0;padding-top:0;padding-bottom:0}
 
 /* ── Pills ── */
 .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
@@ -158,6 +160,7 @@ tr:hover td{background:var(--surface2)}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
 .field input,.field select,.field textarea{font-size:12px;border:1px solid var(--border2);border-radius:var(--radius);padding:7px 10px;background:var(--surface);color:var(--text);font-family:var(--font);outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+.field select{padding-right:30px}
 .field textarea{resize:vertical;min-height:56px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
 
@@ -236,6 +239,39 @@ tr:hover td{background:var(--surface2)}
 
 /* ── Dashboard specific ── */
 .dash-top-row{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
+/* ── Contact structure ── */
+.contact-role-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.contact-role-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.contact-role-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.contact-role-title{font-size:12px;font-weight:600;flex:1}
+.contact-role-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
+/* ── Reports panel ── */
+.rpt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.rpt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;cursor:pointer;transition:all .15s;text-align:center}
+.rpt-card:hover{border-color:var(--blue);background:var(--blue-light)}
+.rpt-card.active{border-color:var(--blue);background:var(--blue-light)}
+.rpt-card-icon{font-size:20px;margin-bottom:5px;color:var(--text3)}
+.rpt-card.active .rpt-card-icon{color:var(--blue)}
+.rpt-card-label{font-size:11px;font-weight:500;color:var(--text2)}
+.rpt-card.active .rpt-card-label{color:var(--blue)}
+.rpt-output{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.rpt-output-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.rpt-output-title{font-size:13px;font-weight:500}
+.rpt-textarea{width:100%;font-size:12px;font-family:var(--mono);border:1px solid var(--border2);border-radius:var(--radius);padding:10px;background:var(--surface2);color:var(--text);outline:none;resize:vertical;min-height:300px;line-height:1.6}
+.rpt-textarea:focus{border-color:var(--blue)}
+/* ── Escalation table ── */
+.esc-row{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border)}
+.esc-row:last-child{border-bottom:none}
+.esc-sev{width:56px;font-size:11px;font-weight:700;padding:10px 12px;flex-shrink:0}
+.esc-def{flex:2;font-size:12px;padding:10px 12px;border-left:1px solid var(--border)}
+.esc-who{flex:1.5;font-size:11px;padding:10px 12px;border-left:1px solid var(--border);color:var(--text2)}
+.esc-time{width:110px;font-size:11px;font-weight:600;padding:10px 12px;border-left:1px solid var(--border);text-align:right;flex-shrink:0}
+/* ── Location change log ── */
+.lc-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.lc-row:last-child{border-bottom:none}
+/* ── Acceptance checklist ── */
+.acc-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.acc-item:last-child{border-bottom:none}
 </style>
 </head>
 <body>
@@ -264,6 +300,7 @@ tr:hover td{background:var(--surface2)}
     <div class="sb-btn" onclick="switchTool('eod',this)"><i class="ti ti-report" aria-hidden="true"></i><span class="sb-tip">EOD Report</span></div>
     <div class="sb-btn" onclick="switchTool('risk',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span class="sb-tip">Risk log</span></div>
     <div class="sb-btn" onclick="switchTool('retro',this)"><i class="ti ti-refresh" aria-hidden="true"></i><span class="sb-tip">Retrospective</span></div>
+    <div class="sb-btn" onclick="switchTool('reports',this)"><i class="ti ti-mail" aria-hidden="true"></i><span class="sb-tip">Reports</span></div>
     <div class="sb-sep"></div>
     <div class="sb-btn" onclick="slackSend()"><i class="ti ti-brand-slack" aria-hidden="true"></i><span class="sb-tip">Send to Slack</span></div>
     <div class="sb-spacer"></div>
@@ -293,6 +330,7 @@ tr:hover td{background:var(--surface2)}
     <div class="nav-item" onclick="switchTool('eod',this)"><i class="ti ti-report" aria-hidden="true"></i> <span data-i18n="toolEod">EOD Report</span></div>
     <div class="nav-item" onclick="switchTool('risk',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <span data-i18n="toolRisk">Risk Log</span> <span class="nav-badge" id="badge-risk" style="display:none">!</span></div>
     <div class="nav-item" onclick="switchTool('retro',this)"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="toolRetro">Retrospective</span></div>
+    <div class="nav-item" onclick="switchTool('reports',this)"><i class="ti ti-mail" aria-hidden="true"></i> <span data-i18n="toolReports">Reports</span></div>
   </div>
 
   <!-- Main -->
@@ -377,6 +415,62 @@ tr:hover td{background:var(--surface2)}
           <div class="sec" data-i18n="stakeholders">Stakeholders</div>
           <div id="sh-list"></div>
           <div class="add-row" onclick="addStakeholder()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addStakeholder">Add stakeholder</span></div>
+          <div class="sec" data-i18n="clientContacts">Client Contact Structure</div>
+          <div class="contact-role-card">
+            <div class="contact-role-hdr">
+              <div class="contact-role-icon" style="background:var(--blue-light);color:var(--blue)"><i class="ti ti-user-star" aria-hidden="true"></i></div>
+              <span class="contact-role-title" data-i18n="spocRole">SPOC — Single Point of Contact</span>
+              <span class="contact-role-badge" style="background:var(--blue-light);color:var(--blue)" data-i18n="confirmAt">Contract signing</span>
+            </div>
+            <div class="form-grid fg3">
+              <div class="field"><label data-i18n="fSpocName">Name</label><input data-contact="spoc.name" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fSpocTitle">Title</label><input data-contact="spoc.title" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fSpocPhone">Phone</label><input data-contact="spoc.phone" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fSpocEmail">Email</label><input data-contact="spoc.email" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fSpocBackup">Backup Contact</label><input data-contact="spoc.backup" oninput="syncContact(this)"></div>
+            </div>
+          </div>
+          <div class="contact-role-card">
+            <div class="contact-role-hdr">
+              <div class="contact-role-icon" style="background:var(--amber-light);color:#854F0B"><i class="ti ti-ship" aria-hidden="true"></i></div>
+              <span class="contact-role-title" data-i18n="vesselRole">Vessel Schedule Control Person</span>
+              <span class="contact-role-badge" style="background:var(--amber-light);color:#854F0B">T-30</span>
+            </div>
+            <div class="form-grid fg3">
+              <div class="field"><label data-i18n="fVCtlName">Name</label><input data-contact="vesselCtl.name" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fVCtlPhone">Phone</label><input data-contact="vesselCtl.phone" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fVCtlEmail">Email</label><input data-contact="vesselCtl.email" oninput="syncContact(this)"></div>
+            </div>
+          </div>
+          <div class="contact-role-card">
+            <div class="contact-role-hdr">
+              <div class="contact-role-icon" style="background:var(--green-light);color:var(--green)"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
+              <span class="contact-role-title" data-i18n="localCtlRole">Local Contact</span>
+              <span class="contact-role-badge" style="background:var(--amber-light);color:#854F0B">T-30</span>
+            </div>
+            <div class="form-grid fg3">
+              <div class="field"><label data-i18n="fLCtlName">Name</label><input data-contact="localCtl.name" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fLCtlPhone">Phone (24h)</label><input data-contact="localCtl.phone" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fLCtlEmail">Email</label><input data-contact="localCtl.email" oninput="syncContact(this)"></div>
+            </div>
+          </div>
+          <div class="contact-role-card">
+            <div class="contact-role-hdr">
+              <div class="contact-role-icon" style="background:var(--purple-light);color:var(--purple)"><i class="ti ti-package" aria-hidden="true"></i></div>
+              <span class="contact-role-title" data-i18n="equipCtdRole">Equipment Custodian</span>
+              <span class="contact-role-badge" style="background:var(--amber-light);color:#854F0B">T-30</span>
+            </div>
+            <div class="form-grid fg3">
+              <div class="field"><label data-i18n="fECtdPhone">Phone</label><input data-contact="equipCtd.phone" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fECtdEmail">Email</label><input data-contact="equipCtd.email" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fECtdName">Name</label><input data-contact="equipCtd.name" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fEquipETA">Equipment ETA</label><input type="date" data-contact="equipETA" oninput="syncContact(this)"></div>
+              <div class="field"><label data-i18n="fEquipArrival">Equipment Arrival Point</label><input data-contact="equipArrival" oninput="syncContact(this)"></div>
+            </div>
+          </div>
+          <div class="sec" data-i18n="locationChange">Location Change Log</div>
+          <div id="lc-list"></div>
+          <div class="add-row" onclick="addLocationChange()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addLocChange">Log location change</span></div>
           <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackKickoff">Kick-off notice</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('charter')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
         </div>
 
@@ -389,7 +483,7 @@ tr:hover td{background:var(--surface2)}
             <div class="stat-card"><div class="sc-label" data-i18n="delayed">Delayed</div><div class="sc-num" id="t-delayed" style="color:var(--red)">0</div></div>
           </div>
           <div class="tbl-wrap"><table style="table-layout:fixed">
-            <colgroup><col style="width:28px"><col><col style="width:72px"><col style="width:92px"><col style="width:74px"><col style="width:140px"><col style="width:80px"></colgroup>
+            <colgroup><col style="width:28px"><col><col style="width:72px"><col style="width:100px"><col style="width:90px"><col style="width:140px"><col style="width:104px"></colgroup>
             <thead><tr><th>#</th><th data-i18n="thCommitment">Commitment</th><th data-i18n="thOwner">Owner</th><th data-i18n="thDue">Due date</th><th data-i18n="thPriority">Priority</th><th data-i18n="thProgress">Progress</th><th data-i18n="thStatus">Status</th></tr></thead>
             <tbody id="tracker-body"></tbody>
           </table><div class="add-row" onclick="addTrackerRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
@@ -410,7 +504,7 @@ tr:hover td{background:var(--surface2)}
             <div style="display:flex;gap:7px;margin-top:7px"><input id="eod-plan-in" style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--font);outline:none" onkeydown="if(event.key==='Enter')addEodItem('plan')"><button class="tbtn" style="padding:5px 9px" onclick="addEodItem('plan')"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
           </div>
           <div class="sec" data-i18n="eodIssues">Issues & blockers</div>
-          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col><col style="width:44px"><col><col style="width:60px"></colgroup>
+          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col><col style="width:50px"><col><col style="width:92px"></colgroup>
             <thead><tr><th data-i18n="thDesc">Description</th><th data-i18n="thSev">Sev.</th><th data-i18n="thAction">Action</th><th data-i18n="thStatus">Status</th></tr></thead>
             <tbody id="eod-issue-body"></tbody>
           </table><div class="add-row" onclick="addEodIssue()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRow">Add</span></div></div>
@@ -420,15 +514,23 @@ tr:hover td{background:var(--surface2)}
         <!-- RISK -->
         <div class="panel" id="panel-risk">
           <div class="sec" data-i18n="riskReg">Risk register</div>
-          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:52px"><col style="width:38px"><col style="width:38px"><col style="width:30px"><col><col style="width:58px"><col style="width:60px"></colgroup>
+          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:52px"><col style="width:38px"><col style="width:38px"><col style="width:30px"><col><col style="width:58px"><col style="width:96px"></colgroup>
             <thead><tr><th>#</th><th data-i18n="thRiskDesc">Risk</th><th data-i18n="thCat">Category</th><th data-i18n="thProb">Prob.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thScore">Score</th><th data-i18n="thMit">Mitigation</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
             <tbody id="risk-body"></tbody>
           </table><div class="add-row" onclick="addRiskRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addRisk">Add risk</span></div></div>
           <div class="sec" style="margin-top:16px" data-i18n="issueLog">Issue log</div>
-          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:82px"><col style="width:38px"><col><col><col style="width:58px"><col style="width:60px"></colgroup>
+          <div class="tbl-wrap"><table style="table-layout:fixed"><colgroup><col style="width:30px"><col><col style="width:82px"><col style="width:50px"><col><col><col style="width:58px"><col style="width:92px"></colgroup>
             <thead><tr><th>#</th><th data-i18n="thDesc">Description</th><th data-i18n="thDate">Date found</th><th data-i18n="thSev">Sev.</th><th data-i18n="thImpact">Impact</th><th data-i18n="thAction">Action</th><th data-i18n="thOwner">Owner</th><th data-i18n="thStatus">Status</th></tr></thead>
             <tbody id="issue-body"></tbody>
           </table><div class="add-row" onclick="addIssueRow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addIssue">Add issue</span></div></div>
+          <div class="sec" data-i18n="escStandards">Issue Escalation Standards</div>
+          <div class="tbl-wrap">
+            <div class="esc-row" style="background:var(--surface2)"><div class="esc-sev" style="font-size:10px;color:var(--text3)" data-i18n="thSev">Sev.</div><div class="esc-def" style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.07em;text-transform:uppercase" data-i18n="thEscDef">Definition</div><div class="esc-who" style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.07em;text-transform:uppercase" data-i18n="thEscNotify">Notify</div><div class="esc-time" style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.07em;text-transform:uppercase" data-i18n="thEscTime">Deadline</div></div>
+            <div class="esc-row"><div class="esc-sev"><span class="pill pill-red">P1</span></div><div class="esc-def" data-i18n="escP1Def">Deployment halted / client asset at risk</div><div class="esc-who" data-i18n="escP1Who">SPOC (call) + Management</div><div class="esc-time" style="color:var(--red)" data-i18n="escP1Time">30 min</div></div>
+            <div class="esc-row"><div class="esc-sev"><span class="pill pill-amber">P2</span></div><div class="esc-def" data-i18n="escP2Def">Core function down / schedule impact &gt;1 day</div><div class="esc-who" data-i18n="escP2Who">SPOC (call)</div><div class="esc-time" style="color:#854F0B" data-i18n="escP2Time">2 hours</div></div>
+            <div class="esc-row"><div class="esc-sev"><span class="pill pill-amber">P3</span></div><div class="esc-def" data-i18n="escP3Def">Minor issue / workaround available</div><div class="esc-who" data-i18n="escP3Who">SPOC (daily report)</div><div class="esc-time" data-i18n="escP3Time">Same-day EOD</div></div>
+            <div class="esc-row"><div class="esc-sev"><span class="pill pill-gray">P4</span></div><div class="esc-def" data-i18n="escP4Def">Potential risk / no immediate impact</div><div class="esc-who" data-i18n="escP4Who">Log for records</div><div class="esc-time" style="color:var(--text3)" data-i18n="escP4Time">Next report</div></div>
+          </div>
           <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackRisk">Risk summary</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('risk')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
         </div>
 
@@ -452,7 +554,49 @@ tr:hover td{background:var(--surface2)}
             <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl4" style="font-size:12px"></div></div>
             <div class="ms-row"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="cl5" style="font-size:12px"></div></div>
           </div>
+          <div class="sec" data-i18n="acceptanceTitle">Acceptance Notice</div>
+          <div class="form-grid fg2" style="margin-bottom:10px">
+            <div class="field"><label data-i18n="accDate">Acceptance Date</label><input type="date" id="acc-date"></div>
+            <div class="field"><label data-i18n="accOutcome">Outcome</label><select id="acc-outcome"><option value="full" data-i18n="retroFull">Full delivery</option><option value="partial" data-i18n="retroPartial">Partial delivery</option><option value="miss" data-i18n="retroMiss">Not delivered</option></select></div>
+          </div>
+          <div id="acc-checklist">
+            <div class="acc-item"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="acc1" style="font-size:12px"></div><span class="pill pill-gray" style="font-size:10px" data-i18n="accAchieved">Achieved</span></div>
+            <div class="acc-item"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="acc2" style="font-size:12px"></div><span class="pill pill-gray" style="font-size:10px" data-i18n="accAchieved">Achieved</span></div>
+            <div class="acc-item"><div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" data-i18n-val="acc3" style="font-size:12px"></div><span class="pill pill-gray" style="font-size:10px" data-i18n="accAchieved">Achieved</span></div>
+          </div>
+          <div class="add-row" onclick="addAccItem()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addAccItem">Add feature</span></div>
+          <div class="sec" data-i18n="closureTitle">Closure Report (T+3–5)</div>
+          <div class="form-grid fg1" style="margin-bottom:10px">
+            <div class="field"><label data-i18n="closureSummary">Mission Outcome Summary</label><textarea id="closure-summary" style="min-height:72px"></textarea></div>
+            <div class="field"><label data-i18n="closureMaint">Maintenance Recommendations & Follow-up</label><textarea id="closure-maint" style="min-height:56px"></textarea></div>
+            <div class="field"><label data-i18n="closureArchive">Archive Location</label><input id="closure-archive"></div>
+          </div>
           <div class="slack-bar"><div class="slack-bar-info"><i class="ti ti-brand-slack" style="color:#4A154B;font-size:16px" aria-hidden="true"></i><span data-i18n="slackRetro">Retrospective summary</span> → <span class="slack-ch">#project-management</span></div><button class="tbtn slack" onclick="slackSend('retro')"><i class="ti ti-send" aria-hidden="true"></i> <span data-i18n="send">Send</span></button></div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="panel" id="panel-reports">
+          <div class="rpt-grid" id="rpt-type-grid">
+            <div class="rpt-card active" id="rptcard-daily" onclick="selectReport('daily')"><div class="rpt-card-icon"><i class="ti ti-calendar-stats" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptDaily">Daily Progress</div></div>
+            <div class="rpt-card" id="rptcard-milestone" onclick="selectReport('milestone')"><div class="rpt-card-icon"><i class="ti ti-flag" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptMilestone">Milestone Report</div></div>
+            <div class="rpt-card" id="rptcard-shipped" onclick="selectReport('shipped')"><div class="rpt-card-icon"><i class="ti ti-package-export" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptShipped">Equipment Shipped</div></div>
+            <div class="rpt-card" id="rptcard-issue" onclick="selectReport('issue')"><div class="rpt-card-icon"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptIssue">Issue Notification</div></div>
+            <div class="rpt-card" id="rptcard-rca" onclick="selectReport('rca')"><div class="rpt-card-icon"><i class="ti ti-zoom-question" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptRca">RCA Report</div></div>
+            <div class="rpt-card" id="rptcard-acceptance" onclick="selectReport('acceptance')"><div class="rpt-card-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptAcceptance">Acceptance Notice</div></div>
+            <div class="rpt-card" id="rptcard-closure" onclick="selectReport('closure')"><div class="rpt-card-icon"><i class="ti ti-archive" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptClosure">Closure Report</div></div>
+            <div class="rpt-card" id="rptcard-locchange" onclick="selectReport('locchange')"><div class="rpt-card-icon"><i class="ti ti-map-pin-cog" aria-hidden="true"></i></div><div class="rpt-card-label" data-i18n="rptLocChange">Location Change</div></div>
+          </div>
+          <div class="rpt-output">
+            <div class="rpt-output-hdr">
+              <div class="rpt-output-title" id="rpt-output-title">Daily Progress Report</div>
+              <div style="display:flex;gap:6px">
+                <button class="tbtn" onclick="refreshReportTemplate()"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="refresh">Refresh</span></button>
+                <button class="tbtn blue" onclick="copyReportTemplate()"><i class="ti ti-copy" aria-hidden="true"></i> <span data-i18n="copyTpl">Copy</span></button>
+                <button class="tbtn slack" onclick="slackSend('reports')"><i class="ti ti-brand-slack" aria-hidden="true"></i> Slack</button>
+              </div>
+            </div>
+            <textarea class="rpt-textarea" id="rpt-textarea" placeholder="Select a report type above to generate template…"></textarea>
+          </div>
         </div>
 
       </div><!-- end content -->
@@ -548,7 +692,7 @@ const T={
     settingsTitle:'Settings',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
     slackTokenNote:'Paste your Slack bot OAuth token (xoxb-…). Stored locally in your browser.',
     slackTokenSet:'✓ Token saved',toastNoToken:'Add your Slack bot token in Settings first',
-    charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',
+    charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',msNotes:'Notes / required actions…',
     stakeholders:'Stakeholders',addStakeholder:'Add stakeholder',
     shName:'Name',shRole:'Role',shContact:'Contact',shNotified:'Notified',
     fName:'Project name',fId:'Project ID',fClient:'Client',fVessel:'Vessel',fLocation:'Location',
@@ -577,6 +721,7 @@ const T={
       eod:['Draft client update','Analyse today\'s issues','Generate EOD Slack message'],
       risk:['Deep risk analysis','Top risk mitigation plan','Generate risk alert'],
       retro:['Summarise lessons learned','Generate action items','Draft closure report'],
+      reports:['Draft daily progress report','Generate issue notification','Draft closure report'],
     },
     pageInfo:{
       dashboard:{title:'Dashboard',sub:'Project overview'},
@@ -585,8 +730,37 @@ const T={
       eod:{title:'EOD Report',sub:'Daily close-out — completed, planned, issues'},
       risk:{title:'Risk & Issue Log',sub:'Risk register + issue log'},
       retro:{title:'Retrospective',sub:'Project review — wins, improvements, actions'},
+      reports:{title:'Reports',sub:'Email templates — daily, milestone, issue, acceptance, closure'},
     },
     toastSent:'Sent to #project-management ✓',
+    toolReports:'Reports',
+    clientContacts:'Client Contact Structure',
+    spocRole:'SPOC — Single Point of Contact',
+    vesselRole:'Vessel Schedule Control Person',
+    localCtlRole:'Local Contact',
+    equipCtdRole:'Equipment Custodian',
+    confirmAt:'Confirm at:',
+    fSpocName:'Name',fSpocTitle:'Title',fSpocPhone:'Phone',fSpocEmail:'Email',fSpocBackup:'Backup Contact',
+    fVCtlName:'Vessel Contact Name',fVCtlPhone:'Phone',fVCtlEmail:'Email',
+    fLCtlName:'Local Contact Name',fLCtlPhone:'Phone (24h)',fLCtlEmail:'Email',
+    fECtdName:'Custodian Name',fECtdPhone:'Phone',fECtdEmail:'Email',
+    fEquipETA:'Equipment ETA',fEquipArrival:'Equipment Arrival Point',
+    locationChange:'Location Change Log',addLocChange:'Log location change',
+    escStandards:'Issue Escalation Standards',
+    thEscDef:'Definition',thEscNotify:'Notify',thEscTime:'Deadline',
+    escP1Def:'Deployment halted / client asset at risk',escP1Who:'SPOC (call) + Management',escP1Time:'30 min',
+    escP2Def:'Core function down / schedule impact >1 day',escP2Who:'SPOC (call)',escP2Time:'2 hours',
+    escP3Def:'Minor issue / workaround available',escP3Who:'SPOC (daily report)',escP3Time:'Same-day EOD',
+    escP4Def:'Potential risk / no immediate impact',escP4Who:'Log for records',escP4Time:'Next report',
+    acceptanceTitle:'Acceptance Notice',accDate:'Acceptance Date',accOutcome:'Outcome',
+    accAchieved:'Achieved',addAccItem:'Add feature',
+    acc1:'UAV system installation complete & tested',acc2:'Client crew training delivered',acc3:'All deliverables signed off by SPOC',
+    closureTitle:'Closure Report (T+3–5)',closureSummary:'Mission Outcome Summary',
+    closureMaint:'Maintenance Recommendations & Follow-up',closureArchive:'Archive Location',
+    rptDaily:'Daily Progress',rptMilestone:'Milestone Report',rptShipped:'Equipment Shipped',
+    rptIssue:'Issue Notification',rptRca:'RCA Report',rptAcceptance:'Acceptance Notice',
+    rptClosure:'Closure Report',rptLocChange:'Location Change',
+    refresh:'Refresh',copyTpl:'Copy',
     errNoId:'Please enter a project ID.',errDup:'This ID already exists.',errMin:'At least one deployment must remain.',
     errDel:(id)=>`Delete ${id}?`,errExport:'Export available for Tracker and Risk Log.',
   },
@@ -597,7 +771,7 @@ const T={
     settingsTitle:'設定',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
     slackTokenNote:'貼上 Slack Bot OAuth Token（xoxb-…），儲存於瀏覽器本地。',
     slackTokenSet:'✓ 已儲存',toastNoToken:'請先在設定中新增 Slack Bot Token',
-    charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',
+    charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',msNotes:'備註 / 必辦事項…',
     stakeholders:'聯絡窗口',addStakeholder:'新增窗口',
     shName:'姓名',shRole:'角色',shContact:'聯絡方式',shNotified:'已通知',
     fName:'專案名稱',fId:'專案編號',fClient:'客戶',fVessel:'船隻',fLocation:'作業地點',
@@ -626,6 +800,7 @@ const T={
       eod:['起草客戶更新信','分析今日問題','產生 EOD Slack'],
       risk:['深度風險分析','建議應對策略','產生風險警示'],
       retro:['歸納 Lessons Learned','產生 Action Items','起草結案摘要'],
+      reports:['產生每日進度回報','產生異常通知','起草結案報告'],
     },
     pageInfo:{
       dashboard:{title:'總覽',sub:'專案狀態一覽'},
@@ -634,8 +809,37 @@ const T={
       eod:{title:'EOD 報告',sub:'每日結案報告'},
       risk:{title:'風險 & 問題紀錄',sub:'風險登錄 + 問題登錄'},
       retro:{title:'回顧',sub:'專案回顧'},
+      reports:{title:'報告',sub:'Email 模板 — 每日進度、里程碑、異常、驗收、結案'},
     },
     toastSent:'已發送至 #project-management ✓',
+    toolReports:'報告',
+    clientContacts:'客戶聯絡架構',
+    spocRole:'SPOC — 統一聯絡窗口',
+    vesselRole:'Vessel Schedule 聯絡人',
+    localCtlRole:'Local Contact 當地聯絡',
+    equipCtdRole:'設備收納負責人',
+    confirmAt:'確認時機:',
+    fSpocName:'姓名',fSpocTitle:'職稱',fSpocPhone:'電話',fSpocEmail:'Email',fSpocBackup:'備用聯絡',
+    fVCtlName:'姓名',fVCtlPhone:'電話',fVCtlEmail:'Email',
+    fLCtlName:'姓名',fLCtlPhone:'電話（24h）',fLCtlEmail:'Email',
+    fECtdName:'姓名',fECtdPhone:'電話',fECtdEmail:'Email',
+    fEquipETA:'設備預計抵達日',fEquipArrival:'設備抵達地點',
+    locationChange:'位置變更紀錄',addLocChange:'新增位置變更',
+    escStandards:'異常升級標準',
+    thEscDef:'定義',thEscNotify:'通知對象',thEscTime:'時限',
+    escP1Def:'部署完全中止 / 客戶資產面臨風險',escP1Who:'SPOC（電話）+ 我方主管',escP1Time:'30 分鐘',
+    escP2Def:'主要功能無法運作 / 時程影響超過 1 天',escP2Who:'SPOC（電話）',escP2Time:'2 小時',
+    escP3Def:'次要問題 / 可暫時繞行',escP3Who:'SPOC（每日回報）',escP3Time:'當日 EOD',
+    escP4Def:'潛在風險 / 無立即影響',escP4Who:'記錄備查',escP4Time:'下次回報',
+    acceptanceTitle:'驗收通知',accDate:'驗收日期',accOutcome:'結果',
+    accAchieved:'已達成',addAccItem:'新增功能項',
+    acc1:'UAV 系統安裝完成並測試通過',acc2:'客戶船員培訓已完成',acc3:'所有交付物已由 SPOC 簽核',
+    closureTitle:'結案報告（T+3-5）',closureSummary:'任務成果摘要',
+    closureMaint:'維護建議與後續行動',closureArchive:'歸檔位置',
+    rptDaily:'每日進度',rptMilestone:'里程碑回報',rptShipped:'設備出發通知',
+    rptIssue:'異常通知',rptRca:'RCA 報告',rptAcceptance:'驗收通知',
+    rptClosure:'結案報告',rptLocChange:'位置變更確認',
+    refresh:'重新產生',copyTpl:'複製',
     errNoId:'請填寫專案編號。',errDup:'此編號已存在。',errMin:'至少保留一個 Deployment。',
     errDel:(id)=>`確定刪除 ${id}？`,errExport:'目前支援 Tracker 和 Risk Log 匯出。',
   }
@@ -665,14 +869,22 @@ const SC={planning:'#E8A020',active:'#3B6D11',done:'#888780'};
 function newDepData(id,client,vessel,location,status){
   return{
     id,client,vessel,location,status,
-    charter:{name:'',id,client,vessel,location,pm:'',start:'',end:'',goal:'',success:'',stakeholders:[]},
+    charter:{name:'',id,client,vessel,location,pm:'',start:'',end:'',goal:'',success:'',stakeholders:[],
+      spoc:{name:'',title:'',phone:'',email:'',backup:''},
+      vesselCtl:{name:'',phone:'',email:''},
+      localCtl:{name:'',phone:'',email:''},
+      equipCtd:{name:'',phone:'',email:''},
+      equipETA:'',equipArrival:'',locationChanges:[],
+    },
     milestones:[
-      {name:'T-30 — Requirements & equipment list frozen',date:'',sIdx:0,done:false},
-      {name:'T-14 — Equipment ready & shipped',date:'',sIdx:0,done:false},
-      {name:'T-7 — Customs docs complete',date:'',sIdx:0,done:false},
-      {name:'T-0 — Arrive on site',date:'',sIdx:0,done:false},
-      {name:'Installation & flight test pass',date:'',sIdx:0,done:false},
-      {name:'Client sign-off',date:'',sIdx:0,done:false},
+      {name:'T-30 — Location confirmed · 3 client contacts obtained · Transport lead time initiated',date:'',sIdx:0,done:false},
+      {name:'T-21 — Transport assessment complete · Equipment schedule finalized · Contingency plan drafted',date:'',sIdx:0,done:false},
+      {name:'T-14 — Kickoff notification sent · Travel confirmed · Equipment list finalized',date:'',sIdx:0,done:false},
+      {name:'T-7 — Site power/network confirmed · Contingency shared · Equipment Custodian notified',date:'',sIdx:0,done:false},
+      {name:'T-3 — Final equipment list sign-off · Emergency contacts ready · Internal briefing done',date:'',sIdx:0,done:false},
+      {name:'T-0 — Departure confirmation sent to SPOC · Equipment & documents checked',date:'',sIdx:0,done:false},
+      {name:'Mission Complete — Acceptance notice + feature checklist sent · SPOC sign-off requested',date:'',sIdx:0,done:false},
+      {name:'T+3-5 — Closure report submitted to SPOC · All records archived',date:'',sIdx:0,done:false},
     ],
     tracker:[],
     eod:{date:new Date().toISOString().slice(0,10),reporter:'',weather:'',done:[],plan:[],issues:[]},
@@ -739,8 +951,24 @@ function saveCurrent(){
   ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
     const el=document.querySelector(`[data-field="${f}"]`);if(el)d.charter[f]=el.value;
   });
+  // Client contacts
+  document.querySelectorAll('[data-contact]').forEach(el=>{
+    const path=el.dataset.contact.split('.');
+    if(path.length===2){if(!d.charter[path[0]])d.charter[path[0]]={};d.charter[path[0]][path[1]]=el.value;}
+    else{d.charter[path[0]]=el.value;}
+  });
+  // Acceptance & Closure
+  const accDate=document.getElementById('acc-date');if(accDate)d.retro.accDate=accDate.value;
+  const accOutcome=document.getElementById('acc-outcome');if(accOutcome)d.retro.accOutcome=accOutcome.value||'full';
+  d.retro.accItems=[...document.querySelectorAll('#acc-checklist .acc-item')].map(r=>({
+    text:r.querySelector('input')?.value||'',done:r.querySelector('.chk')?.classList.contains('done')||false
+  }));
+  const closSum=document.getElementById('closure-summary');if(closSum)d.retro.closureSummary=closSum.value;
+  const closMaint=document.getElementById('closure-maint');if(closMaint)d.retro.closureMaint=closMaint.value;
+  const closArch=document.getElementById('closure-archive');if(closArch)d.retro.closureArchive=closArch.value;
   d.milestones=[...document.querySelectorAll('#ms-list .ms-row')].map(r=>({
     name:r.querySelector('.ms-name-input')?.value||'',
+    notes:r.querySelector('.ms-notes-input')?.value||'',
     date:r.querySelector('.ms-date-input')?.value||'',
     sIdx:Math.max(0,t('msStatus').indexOf(r.querySelector('select')?.value)),
     done:r.querySelector('.chk')?.classList.contains('done')||false,
@@ -787,6 +1015,21 @@ function loadDep(id){
   ['name','id','client','vessel','location','pm','start','end','goal','success'].forEach(f=>{
     const el=document.querySelector(`[data-field="${f}"]`);if(el)el.value=d.charter[f]||'';
   });
+  // Client contacts
+  document.querySelectorAll('[data-contact]').forEach(el=>{
+    const path=el.dataset.contact.split('.');
+    if(path.length===2){el.value=(d.charter[path[0]]&&d.charter[path[0]][path[1]])||'';}
+    else{el.value=d.charter[path[0]]||'';}
+  });
+  // Location change log
+  renderLocationChanges(d.charter.locationChanges||[]);
+  // Acceptance & Closure
+  const accDate=document.getElementById('acc-date');if(accDate)accDate.value=d.retro.accDate||'';
+  const accOutcome=document.getElementById('acc-outcome');if(accOutcome)accOutcome.value=d.retro.accOutcome||'full';
+  renderAccItems(d.retro.accItems||[{text:t('acc1'),done:false},{text:t('acc2'),done:false},{text:t('acc3'),done:false}]);
+  const closSum=document.getElementById('closure-summary');if(closSum)closSum.value=d.retro.closureSummary||'';
+  const closMaint=document.getElementById('closure-maint');if(closMaint)closMaint.value=d.retro.closureMaint||'';
+  const closArch=document.getElementById('closure-archive');if(closArch)closArch.value=d.retro.closureArchive||'';
   renderMilestones(d.milestones);renderStakeholders(d.charter.stakeholders||[]);renderTracker(d.tracker);
   document.getElementById('eod-date').value=d.eod.date;
   document.getElementById('eod-reporter').value=d.eod.reporter;
@@ -826,11 +1069,16 @@ function pilClass(status){
 
 function renderMilestones(mss){
   document.getElementById('ms-list').innerHTML=mss.map(m=>`
-    <div class="ms-row">
-      <div class="chk${m.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
-      <div style="flex:1"><input class="ms-name-input ie" value="${escH(m.name)}" style="font-size:13px;font-weight:500" placeholder="${t('addMs')}"></div>
-      <input class="ms-date-input ie" type="date" value="${m.date||''}" style="font-size:11px;color:var(--text3);width:115px;font-family:var(--mono)">
-      <select class="ie" style="font-size:11px;color:var(--text3);width:72px">${msStatusOpts(m.sIdx||0)}</select>
+    <div class="ms-row" style="flex-direction:column;align-items:stretch;gap:4px">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div class="chk${m.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
+        <div style="flex:1;min-width:0"><input class="ms-name-input ie" value="${escH(m.name)}" style="font-size:13px;font-weight:500;width:100%" placeholder="${t('addMs')}"></div>
+        <input class="ms-date-input ie" type="date" value="${m.date||''}" style="font-size:11px;color:var(--text3);width:115px;flex-shrink:0;font-family:var(--mono)">
+        <select class="ie" style="font-size:11px;color:var(--text3);min-width:90px;flex-shrink:0">${msStatusOpts(m.sIdx||0)}</select>
+      </div>
+      <div style="padding-left:27px">
+        <input class="ms-notes-input ie" value="${escH(m.notes||'')}" placeholder="${t('msNotes')}" style="font-size:11px;color:var(--text3);width:100%">
+      </div>
     </div>`).join('');
 }
 function renderStakeholders(arr){
@@ -1001,8 +1249,19 @@ function calcRisk(sel){
 function toggleChk(el){el.classList.toggle('done');}
 function addMs(){
   const d=document.createElement('div');d.className='ms-row';
-  d.innerHTML=`<div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div><div style="flex:1"><input class="ms-name-input ie" style="font-size:13px;font-weight:500" placeholder="${t('addMs')}"></div><input class="ms-date-input ie" type="date" style="font-size:11px;color:var(--text3);width:115px;font-family:var(--mono)"><select class="ie" style="font-size:11px;color:var(--text3);width:72px">${msStatusOpts(0)}</select>`;
+  d.style.cssText='flex-direction:column;align-items:stretch;gap:4px';
+  d.innerHTML=`
+    <div style="display:flex;align-items:center;gap:9px">
+      <div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
+      <div style="flex:1;min-width:0"><input class="ms-name-input ie" style="font-size:13px;font-weight:500;width:100%" placeholder="${t('addMs')}"></div>
+      <input class="ms-date-input ie" type="date" style="font-size:11px;color:var(--text3);width:115px;flex-shrink:0;font-family:var(--mono)">
+      <select class="ie" style="font-size:11px;color:var(--text3);min-width:90px;flex-shrink:0">${msStatusOpts(0)}</select>
+    </div>
+    <div style="padding-left:27px">
+      <input class="ms-notes-input ie" placeholder="${t('msNotes')}" style="font-size:11px;color:var(--text3);width:100%">
+    </div>`;
   document.getElementById('ms-list').appendChild(d);
+  d.querySelector('.ms-name-input').focus();
 }
 function addTrackerRow(){
   const n=document.querySelectorAll('#tracker-body tr').length+1;
@@ -1129,7 +1388,9 @@ function buildSlackMsg(tool){
   return all;
 }
 async function slackSend(tool){
-  const tk=tool||currentTool;const msg=buildSlackMsg(tk);if(!msg)return;
+  const tk=tool||currentTool;
+  const msg=tk==='reports'?generateReportTemplate(currentReport):buildSlackMsg(tk);
+  if(!msg)return;
   const token=localStorage.getItem('valtec_slack_token');
   if(!token){showToast(t('toastNoToken'));return;}
   try{
@@ -1180,10 +1441,178 @@ function showToast(msg){
 // ── Utils ─────────────────────────────────────────────────────────────────────
 function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ── Contact sync ──────────────────────────────────────────────────────────────
+function syncContact(el){
+  if(!currentDep)return;
+  const path=el.dataset.contact.split('.');
+  const c=deps[currentDep].charter;
+  if(path.length===2){if(!c[path[0]])c[path[0]]={};c[path[0]][path[1]]=el.value;}
+  else{c[path[0]]=el.value;}
+}
+
+// ── Location change log ───────────────────────────────────────────────────────
+function renderLocationChanges(arr){
+  const el=document.getElementById('lc-list');if(!el)return;
+  if(!arr||!arr.length){el.innerHTML=`<div style="padding:8px 0;font-size:12px;color:var(--text3)" data-i18n="noLocChanges">${t('noLocChanges')||'No location changes recorded'}</div>`;return;}
+  el.innerHTML=arr.map((lc,i)=>`
+    <div class="lc-row">
+      <input class="ie" value="${escH(lc.date||'')}" type="date" style="width:115px;font-family:var(--mono);font-size:11px" oninput="updateLC(${i},'date',this.value)">
+      <span style="color:var(--text3);font-size:11px">→</span>
+      <input class="ie" value="${escH(lc.from||'')}" placeholder="${lang==='zh'?'原地點':'From'}" style="flex:1" oninput="updateLC(${i},'from',this.value)">
+      <span style="color:var(--text3);font-size:11px">→</span>
+      <input class="ie" value="${escH(lc.to||'')}" placeholder="${lang==='zh'?'新地點':'To'}" style="flex:1" oninput="updateLC(${i},'to',this.value)">
+      <input class="ie" value="${escH(lc.impact||'')}" placeholder="${lang==='zh'?'T0影響':'T0 impact'}" style="flex:1;font-size:11px;color:var(--text3)" oninput="updateLC(${i},'impact',this.value)">
+      <div class="chk${lc.confirmed?' done':''}" onclick="toggleLC(${i},this)" title="${lang==='zh'?'SPOC已書面確認':'SPOC confirmed'}"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
+      <i class="ti ti-x" style="font-size:12px;cursor:pointer;color:var(--text3)" onclick="removeLC(${i})" aria-hidden="true"></i>
+    </div>`).join('');
+}
+function addLocationChange(){
+  if(!currentDep)return;
+  const c=deps[currentDep].charter;
+  if(!c.locationChanges)c.locationChanges=[];
+  c.locationChanges.push({date:new Date().toISOString().slice(0,10),from:'',to:'',impact:'',confirmed:false});
+  renderLocationChanges(c.locationChanges);
+}
+function updateLC(i,key,val){
+  if(!currentDep)return;
+  const arr=deps[currentDep].charter.locationChanges||[];
+  if(arr[i])arr[i][key]=val;
+}
+function toggleLC(i,el){
+  if(!currentDep)return;
+  const arr=deps[currentDep].charter.locationChanges||[];
+  if(arr[i]){arr[i].confirmed=!arr[i].confirmed;el.classList.toggle('done',arr[i].confirmed);}
+}
+function removeLC(i){
+  if(!currentDep)return;
+  const arr=deps[currentDep].charter.locationChanges||[];
+  arr.splice(i,1);renderLocationChanges(arr);
+}
+
+// ── Acceptance items ──────────────────────────────────────────────────────────
+function renderAccItems(items){
+  const el=document.getElementById('acc-checklist');if(!el)return;
+  el.innerHTML=items.map(it=>`
+    <div class="acc-item">
+      <div class="chk${it.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i></div>
+      <div style="flex:1"><input class="ie" value="${escH(it.text||'')}" style="font-size:12px"></div>
+      <span class="pill ${it.done?'pill-green':'pill-gray'}" style="font-size:10px;cursor:pointer" onclick="this.previousElementSibling.previousElementSibling.click()">${it.done?t('done'):t('accAchieved')}</span>
+    </div>`).join('');
+}
+function addAccItem(){
+  if(!currentDep)return;
+  saveCurrent();
+  if(!deps[currentDep].retro.accItems)deps[currentDep].retro.accItems=[];
+  deps[currentDep].retro.accItems.push({text:'',done:false});
+  renderAccItems(deps[currentDep].retro.accItems);
+  document.querySelector('#acc-checklist .acc-item:last-child input')?.focus();
+}
+
+// ── Reports panel ─────────────────────────────────────────────────────────────
+let currentReport='daily';
+function selectReport(type){
+  document.querySelectorAll('.rpt-card').forEach(c=>c.classList.remove('active'));
+  const card=document.getElementById('rptcard-'+type);
+  if(card)card.classList.add('active');
+  currentReport=type;
+  refreshReportTemplate();
+}
+function refreshReportTemplate(){
+  if(currentDep)saveCurrent();
+  const text=generateReportTemplate(currentReport);
+  document.getElementById('rpt-textarea').value=text;
+  const titles={
+    daily:t('rptDaily'),milestone:t('rptMilestone'),shipped:t('rptShipped'),
+    issue:t('rptIssue'),rca:t('rptRca'),acceptance:t('rptAcceptance'),
+    closure:t('rptClosure'),locchange:t('rptLocChange')
+  };
+  document.getElementById('rpt-output-title').textContent=titles[currentReport]||currentReport;
+}
+function copyReportTemplate(){
+  const text=document.getElementById('rpt-textarea').value;
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>showToast(lang==='zh'?'已複製 ✓':'Copied ✓'));}
+  else{showToast(lang==='zh'?'已複製 ✓':'Copied ✓');}
+}
+function generateReportTemplate(type){
+  if(!currentDep)return lang==='zh'?'請先選擇 Deployment。':'Please select a deployment first.';
+  const d=deps[currentDep];
+  const id=d.id||'—';
+  const spoc=d.charter.spoc||{};
+  const spocName=spoc.name||'[SPOC Name]';
+  const pm=d.charter.pm||'[PM Name]';
+  const today=new Date().toISOString().slice(0,10).replace(/-/g,'/');
+  const hhmm=new Date().toTimeString().slice(0,5);
+  if(type==='daily'){
+    const done=d.eod.done.map(v=>`• ${v}`).join('\n')||'• ';
+    const plan=d.eod.plan.map(v=>`• ${v}`).join('\n')||'• ';
+    const issues=d.eod.issues.length?d.eod.issues.map(r=>`• [${t('sevOpts')[r.sevIdx||2]}] ${r.desc}`).join('\n'):'None';
+    if(lang==='zh')return`主旨：[${id}] ${today} 現場進度回報\n\nDear ${spocName},\n\n以下為今日（${today}）現場進度更新：\n\n✅ 今日完成\n${done}\n\n🔄 進行中\n• \n\n📋 明日計畫\n${plan}\n\n⚠ 風險 / 待決事項\n${issues}\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [${id}] ${today} Daily Field Progress Update\n\nDear ${spocName},\n\nPlease find today's (${today}) field progress update below:\n\n✅ Completed Today\n${done}\n\n🔄 In Progress\n• \n\n📋 Plan for Tomorrow\n${plan}\n\n⚠ Risks / Open Items\n${issues}\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='milestone'){
+    const ms=d.milestones.filter(m=>m.done);
+    const latest=ms[ms.length-1];
+    const msName=latest?latest.name:'[Milestone Name]';
+    if(lang==='zh')return`主旨：[${id}] 里程碑達成通知\n\nDear ${spocName},\n\n以下里程碑已正式完成：\n\n📍 里程碑：${msName}\n📅 完成日期：${today}\n📎 附件：[現場佐證照片 / 文件]\n\n請回覆此 Email 確認簽核，或告知如有異議。\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [${id}] Milestone Completion Notice\n\nDear ${spocName},\n\nThe following milestone has been completed:\n\n📍 Milestone: ${msName}\n📅 Completion Date: ${today}\n📎 Attachments: [Evidence photos / documents]\n\nPlease reply to confirm sign-off, or let us know if you have any concerns.\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='shipped'){
+    const custodian=d.charter.equipCtd||{};
+    const eta=d.charter.equipETA||'[ETA]';
+    const arrival=d.charter.equipArrival||'[Arrival Point]';
+    if(lang==='zh')return`主旨：[${id}] 設備出發通知\n\nDear ${spocName},\n\n本次部署設備已於今日（${today}）正式出發，詳細如下：\n\n📦 出發確認日：${today}\n📍 目的地 / 抵達地點：${arrival}\n📅 預計抵達日（ETA）：${eta}\n🚢 運輸追蹤資訊：[追蹤號 / 物流說明]\n\n請告知設備收納負責人（${custodian.name||'[設備收納負責人]'}）做好接收準備。\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [${id}] Equipment Shipped Notification\n\nDear ${spocName},\n\nPlease be advised that the equipment for this deployment has departed today (${today}):\n\n📦 Departure Date: ${today}\n📍 Destination / Arrival Point: ${arrival}\n📅 Estimated Arrival (ETA): ${eta}\n🚢 Tracking Info: [Tracking number / logistics details]\n\nPlease ensure your Equipment Custodian (${custodian.name||'[Equipment Custodian]'}) is prepared to receive the shipment.\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='issue'){
+    if(lang==='zh')return`主旨：[緊急] [${id}] 現場異常通知 – ${today} ${hhmm}\n\nDear ${spocName},\n\n（請先致電，此 Email 為書面記錄）\n\n問題描述：\n[發生了什麼]\n\n影響範圍：\n[哪些功能 / 時程受影響]\n\n當前緩解措施：\n[已採取的行動]\n\n預計恢復時間（ETA）：\n[時間或待評估]\n\n下次更新：預計 30 分鐘後\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [URGENT] [${id}] Field Issue Notification – ${today} ${hhmm}\n\nDear ${spocName},\n\n(Please call first; this email serves as the written record.)\n\nIssue Description:\n[What happened]\n\nImpact:\n[Functions / schedule affected]\n\nCurrent Mitigation:\n[Actions taken]\n\nETA:\n[Time or TBD]\n\nNext update: In 30 minutes\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='rca'){
+    if(lang==='zh')return`主旨：[${id}] 異常根因分析（RCA）報告\n\nDear ${spocName},\n\n針對 ${today} 發生之異常事件，我方已完成根因分析，詳細如下：\n\n🔍 根本原因：\n[根本原因說明]\n\n✅ 解決方式：\n[已採取的解決措施]\n\n🛡 預防措施：\n[未來預防方案]\n\n如有任何問題，請隨時聯繫。\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [${id}] Root Cause Analysis (RCA) Report\n\nDear ${spocName},\n\nFollowing the incident on ${today}, please find our Root Cause Analysis below:\n\n🔍 Root Cause:\n[Root cause description]\n\n✅ Resolution:\n[Actions taken to resolve]\n\n🛡 Prevention:\n[Measures to prevent recurrence]\n\nPlease feel free to reach out if you have any questions.\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='acceptance'){
+    const outcome={'full':'Full delivery','partial':'Partial delivery','miss':'Not delivered'}[d.retro.accOutcome||'full'];
+    const items=(d.retro.accItems||[]).map(it=>`${it.done?'✅':'⬜'} ${it.text}`).join('\n')||'• ';
+    if(lang==='zh'){
+      const zh_outcome={'full':'全數達成','partial':'部分達成','miss':'未達成'}[d.retro.accOutcome||'full'];
+      return`主旨：[${id}] 部署任務完成 – 請 SPOC 確認驗收\n\nDear ${spocName},\n\n本次部署任務已正式完成，最終結果：${zh_outcome}\n\n📋 功能清單確認：\n${items}\n\n請以 Email 回覆確認，作為正式驗收依據。\n後續聯絡窗口：${pm}\n\n${pm}\nValtec UAV Services`;
+    }
+    return`Subject: [${id}] Deployment Complete – Please Confirm Acceptance\n\nDear ${spocName},\n\nWe are pleased to confirm the deployment mission is complete. Outcome: ${outcome}\n\n📋 Feature Checklist:\n${items}\n\nPlease reply to this email to confirm your formal acceptance.\nPost-deployment support contact: ${pm}\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='closure'){
+    const summary=d.retro.closureSummary||'[Mission outcome summary]';
+    const maint=d.retro.closureMaint||'[Maintenance recommendations]';
+    const arch=d.retro.closureArchive||'[Archive location]';
+    if(lang==='zh')return`主旨：[${id}] 結案報告\n\nDear ${spocName},\n\n以下為本次部署任務的結案報告。\n\n📊 任務成果摘要：\n${summary}\n\n🔧 後續維護建議：\n${maint}\n\n📂 回報紀錄歸檔位置：\n${arch}\n\n感謝本次合作，如有任何問題，歡迎隨時聯繫。\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [${id}] Project Closure Report\n\nDear ${spocName},\n\nPlease find the project closure report below.\n\n📊 Mission Outcome Summary:\n${summary}\n\n🔧 Maintenance Recommendations & Follow-up:\n${maint}\n\n📂 Archive Location:\n${arch}\n\nThank you for your partnership. Please don't hesitate to reach out with any questions.\n\n${pm}\nValtec UAV Services`;
+  }
+  if(type==='locchange'){
+    const lcs=d.charter.locationChanges||[];
+    const latest=lcs[lcs.length-1]||{from:'[Original location]',to:'[New location]',impact:'[No impact / Delayed by X days]'};
+    if(lang==='zh')return`主旨：[${id}] 部署位置變更確認 – 請 SPOC 書面確認\n\nDear ${spocName},\n\n原部署位置：${latest.from||'[原地點]'}\n新部署位置：${latest.to||'[新地點]'}\n對 T0 的影響：${latest.impact||'[不影響 / 延後 X 天]'}\n三方聯絡人是否需要更新：[是 / 否]\n\n請回覆此 email 確認，我們將於收到確認後正式執行變更。\n\n${pm}\nValtec UAV Services`;
+    return`Subject: [${id}] Location Change Confirmation – SPOC Acknowledgment Required\n\nDear ${spocName},\n\nOriginal location: ${latest.from||'[Original location]'}\nNew location: ${latest.to||'[New location]'}\nImpact on T0: ${latest.impact||'[No impact / Delayed by X days]'}\nClient-side contacts update required: [Yes / No]\n\nPlease reply to confirm; we will proceed upon receipt of your written confirmation.\n\n${pm}\nValtec UAV Services`;
+  }
+  return '';
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 function init(){
   deps['DLY007']=newDepData('DLY007','LungSoon Ocean Group','PJ8','Majuro, Marshall Islands','active');
   deps['DLY007'].charter.pm='Mia Lin';
+  deps['DLY007'].charter.spoc={name:'Mr. Chen Wei',title:'Fleet Operations Manager',phone:'+692-XXX-XXXX',email:'chen.wei@lungsoon.com',backup:''};
+  deps['DLY007'].charter.vesselCtl={name:'Capt. Liu',phone:'+692-XXX-XXXX',email:''};
+  deps['DLY007'].charter.localCtl={name:'',phone:'',email:''};
+  deps['DLY007'].charter.equipCtd={name:'',phone:'',email:''};
+  deps['DLY007'].charter.equipETA='';
+  deps['DLY007'].charter.equipArrival='Majuro International Airport';
+  deps['DLY007'].charter.locationChanges=[];
+  deps['DLY007'].retro.accItems=[{text:'UAV system installation complete & tested',done:false},{text:'Client crew training delivered',done:false},{text:'All deliverables signed off by SPOC',done:false}];
+  deps['DLY007'].retro.accDate='';
+  deps['DLY007'].retro.accOutcome='full';
+  deps['DLY007'].retro.closureSummary='';
+  deps['DLY007'].retro.closureMaint='';
+  deps['DLY007'].retro.closureArchive='';
   deps['DLY007'].charter.name='DLY007 Majuro Deployment';
   deps['DLY007'].charter.goal='Complete UAV equipment pre-positioning and MARLIN GCS setup aboard PJ8. Ensure all systems are operational and crew are trained before fish detection services go live.';
   deps['DLY007'].tracker=[

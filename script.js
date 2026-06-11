@@ -260,12 +260,12 @@ function renderDepTabs() {
     const d = deps[id]; const act = id===currentDep?'active':'';
     const slabel = t('statusLabel')[d.status] || d.status;
     return `<div class="dep-tab ${act}" onclick="switchDep('${id}')">
-      <span class="ds" style="background:${STATUS_COLOR[d.status]}"></span>
-      <span class="dep-tab-id">${id}</span>
-      <span class="dep-status-badge dep-status-${d.status}">${slabel}</span>
-      <span class="dep-tab-client">${d.client?'· '+d.client.slice(0,12):''}</span>
-      <span class="ddel" onclick="event.stopPropagation();deleteDep('${id}')" title="Delete"><i class="ti ti-x" aria-hidden="true"></i></span>
-    </div>`;
+  <span class="ds" style="background:${STATUS_COLOR[d.status]}"></span>
+  <span class="dep-tab-id">${id}</span>
+  <span class="dep-status-badge dep-status-${d.status}">${slabel}</span>
+  <span class="dep-tab-client">${d.client?'· '+d.client.slice(0,12):''}</span>
+  <span class="ddel" onclick="event.stopPropagation();deleteDep('${id}')" title="Delete"><i class="ti ti-x" aria-hidden="true"></i></span>
+</div>`;
   }).join('');
 }
 
@@ -283,7 +283,7 @@ function deleteDep(id) {
   if(Object.keys(deps).length<=1){alert(t('alertMin'));return;}
   if(!confirm(t('alertConfirmDel')(id))) return;
   delete deps[id];
-  if(currentDep===id){const first=Object.keys(deps)[0]; currentDep=null; switchDep(first);}    
+  if(currentDep===id){const first=Object.keys(deps)[0]; currentDep=null; switchDep(first);}
   renderDepTabs();
 }
 
@@ -374,52 +374,61 @@ function sevOpts(cur){return t('sevOpts').map((s,i)=>`<option${i===cur?' selecte
 
 function renderMilestones(mss){
   document.getElementById('ms-list').innerHTML=mss.map(m=>`
-    <div class="ms-row">
-      <div class="chk${m.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div>
-      <div style="flex:1"><input class="ie" value="${m.name||''}" style="font-size:12px;font-weight:500"></div>
-      <input class="ie" type="date" value="${m.date||''}" style="font-size:10px;color:var(--text-tertiary);width:110px;font-family:var(--font-mono)">
-      <select class="ie" style="font-size:10px;color:var(--text-tertiary);width:65px">${msStatusOpts(m.sIdx||0)}</select>
-    </div>`).join('');
+  <div class="ms-row">
+    <div class="chk w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0 cursor-pointer${m.done?' done':''}" onclick="toggleChk(this)"><i class="ti ti-check text-[9px]" aria-hidden="true"></i></div>
+    <div class="flex-1"><input class="ie font-medium" value="${m.name||''}"></div>
+    <input class="ie font-mono text-xs text-gray-400 w-28" type="date" value="${m.date||''}">
+    <select class="ie text-xs text-gray-500 w-20">${msStatusOpts(m.sIdx||0)}</select>
+  </div>`).join('');
 }
 
 function renderTracker(rows){
   document.getElementById('tracker-body').innerHTML=rows.map((r,i)=>`
-    <tr><td style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:10px">${String(i+1).padStart(2,'0')}</td>
-    <td><input class="ie" value="${r.item||''}"></td><td><input class="ie" value="${r.owner||''}"></td>
-    <td><input class="ie" type="date" value="${r.due||''}" style="font-family:var(--font-mono);font-size:10px"></td>
-    <td><select class="ie" onchange="updateTrackerStats()">${tStatusOpts(r.sIdx||0)}</select></td>
-    <td><input class="ie" value="${r.note||''}"></td></tr>`).join('');
+  <tr>
+    <td class="font-mono text-xs text-gray-400">${String(i+1).padStart(2,'0')}</td>
+    <td><input class="ie" value="${r.item||''}"></td>
+    <td><input class="ie" value="${r.owner||''}"></td>
+    <td><input class="ie font-mono text-xs" type="date" value="${r.due||''}"></td>
+    <td><select class="ie text-xs" onchange="updateTrackerStats()">${tStatusOpts(r.sIdx||0)}</select></td>
+    <td><input class="ie text-gray-500" value="${r.note||''}"></td>
+  </tr>`).join('');
   updateTrackerStats();
 }
 
 function renderEodList(type,items){
   document.getElementById(`eod-${type}-list`).innerHTML=items.map(v=>`
-    <div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px">
-      <div class="chk" style="width:14px;height:14px" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:8px" aria-hidden="true"></i></div>
-      <span class="eod-txt" style="flex:1">${v}</span>
-      <i class="ti ti-x" style="font-size:11px;cursor:pointer;color:var(--text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i>
-    </div>`).join('');
+  <div class="flex items-center gap-2 py-1.5 text-sm text-gray-700">
+    <div class="chk w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0 cursor-pointer" onclick="toggleChk(this)"><i class="ti ti-check text-[9px]" aria-hidden="true"></i></div>
+    <span class="eod-txt flex-1">${v}</span>
+    <i class="ti ti-x text-xs text-gray-400 cursor-pointer hover:text-gray-600" onclick="this.parentElement.remove()" aria-hidden="true"></i>
+  </div>`).join('');
 }
 
 function renderEodIssues(issues){
   document.getElementById('eod-issue-body').innerHTML=issues.map(r=>`
-    <tr><td><input class="ie" value="${r.desc||''}"></td>
-    <td><select class="ie">${sevOpts(r.sevIdx||2)}</select></td>
+  <tr>
+    <td><input class="ie" value="${r.desc||''}"></td>
+    <td><select class="ie text-xs">${sevOpts(r.sevIdx||2)}</select></td>
     <td><input class="ie" value="${r.action||''}"></td>
-    <td><select class="ie">${iStatusOpts(r.statusIdx||0)}</select></td></tr>`).join('');
+    <td><select class="ie text-xs">${iStatusOpts(r.statusIdx||0)}</select></td>
+  </tr>`).join('');
 }
 
 function renderRisks(risks){
   riskCount=risks.length;
   document.getElementById('risk-body').innerHTML=risks.map((r,i)=>{
     const sc=r.score||9; const cls=sc>=6?'rh':sc>=3?'rm':'rl2';
-    return `<tr><td style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:10px">R${String(i+1).padStart(2,'0')}</td>
-    <td><input class="ie" value="${r.desc||''}"></td><td><input class="ie" value="${r.cat||''}"></td>
-    <td><select class="ie" onchange="calcRisk(this)"><option${r.prob==='H'?' selected':''}>H</option><option${r.prob==='M'?' selected':''}>M</option><option${r.prob==='L'?' selected':''}>L</option></select></td>
-    <td><select class="ie" onchange="calcRisk(this)"><option${r.impact==='H'?' selected':''}>H</option><option${r.impact==='M'?' selected':''}>M</option><option${r.impact==='L'?' selected':''}>L</option></select></td>
+    return `<tr>
+    <td class="font-mono text-xs text-gray-400">R${String(i+1).padStart(2,'0')}</td>
+    <td><input class="ie" value="${r.desc||''}"></td>
+    <td><input class="ie text-xs" value="${r.cat||''}"></td>
+    <td><select class="ie text-xs" onchange="calcRisk(this)"><option${r.prob==='H'?' selected':''}>H</option><option${r.prob==='M'?' selected':''}>M</option><option${r.prob==='L'?' selected':''}>L</option></select></td>
+    <td><select class="ie text-xs" onchange="calcRisk(this)"><option${r.impact==='H'?' selected':''}>H</option><option${r.impact==='M'?' selected':''}>M</option><option${r.impact==='L'?' selected':''}>L</option></select></td>
     <td><span class="rl ${cls}">${sc}</span></td>
-    <td><input class="ie" value="${r.mit||''}"></td><td><input class="ie" value="${r.owner||''}"></td>
-    <td><select class="ie">${rStatusOpts(r.sIdx||0)}</select></td></tr>`;
+    <td><input class="ie text-xs" value="${r.mit||''}"></td>
+    <td><input class="ie text-xs" value="${r.owner||''}"></td>
+    <td><select class="ie text-xs">${rStatusOpts(r.sIdx||0)}</select></td>
+  </tr>`;
   }).join('');
   updateRiskBadge();
 }
@@ -427,21 +436,26 @@ function renderRisks(risks){
 function renderIssues(issues){
   issueCount=issues.length;
   document.getElementById('issue-body').innerHTML=issues.map((r,i)=>`
-    <tr><td style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:10px">I${String(i+1).padStart(2,'0')}</td>
+  <tr>
+    <td class="font-mono text-xs text-gray-400">I${String(i+1).padStart(2,'0')}</td>
     <td><input class="ie" value="${r.desc||''}"></td>
-    <td><input class="ie" type="date" value="${r.date||''}" style="font-family:var(--font-mono);font-size:10px"></td>
-    <td><select class="ie">${sevOpts(r.sevIdx||2)}</select></td>
-    <td><input class="ie" value="${r.impact||''}"></td><td><input class="ie" value="${r.action||''}"></td>
-    <td><input class="ie" value="${r.owner||''}"></td>
-    <td><select class="ie">${iStatusOpts(r.statusIdx||0)}</select></td></tr>`).join('');
+    <td><input class="ie font-mono text-xs text-gray-400" type="date" value="${r.date||''}"></td>
+    <td><select class="ie text-xs">${sevOpts(r.sevIdx||2)}</select></td>
+    <td><input class="ie text-xs" value="${r.impact||''}"></td>
+    <td><input class="ie text-xs" value="${r.action||''}"></td>
+    <td><input class="ie text-xs" value="${r.owner||''}"></td>
+    <td><select class="ie text-xs">${iStatusOpts(r.statusIdx||0)}</select></td>
+  </tr>`).join('');
 }
 
 function renderRetroCol(type,items){
   const m={good:'retro-good',bad:'retro-bad',action:'retro-action'};
   document.getElementById(m[type]).innerHTML=items.map(v=>`
-    <div class="ri"><i class="ti ti-circle-dot" style="font-size:10px;flex-shrink:0;margin-top:2px;color:var(--text-tertiary)" aria-hidden="true"></i>
-    <span style="flex:1">${v}</span>
-    <i class="ti ti-x" style="font-size:10px;cursor:pointer;color:var(--text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i></div>`).join('');
+  <div class="ri">
+    <i class="ti ti-circle-dot text-[10px] flex-shrink-0 mt-0.5 text-gray-300" aria-hidden="true"></i>
+    <span class="flex-1">${v}</span>
+    <i class="ti ti-x text-[10px] cursor-pointer text-gray-300 hover:text-gray-500" onclick="this.parentElement.remove()" aria-hidden="true"></i>
+  </div>`).join('');
 }
 
 function updateTrackerStats(){
@@ -477,14 +491,14 @@ function toggleChk(el){el.classList.toggle('done');}
 
 function addMs(){
   const d=document.createElement('div'); d.className='ms-row';
-  d.innerHTML=`<div class="chk" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div><div style="flex:1"><input class="ie" style="font-size:12px;font-weight:500"></div><input class="ie" type="date" style="font-size:10px;color:var(--text-tertiary);width:110px;font-family:var(--font-mono)"><select class="ie" style="font-size:10px;color:var(--text-tertiary);width:65px">${msStatusOpts(0)}</select>`;
+  d.innerHTML=`<div class="chk w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0 cursor-pointer" onclick="toggleChk(this)"><i class="ti ti-check text-[9px]" aria-hidden="true"></i></div><div class="flex-1"><input class="ie font-medium"></div><input class="ie font-mono text-xs text-gray-400 w-28" type="date"><select class="ie text-xs text-gray-500 w-20">${msStatusOpts(0)}</select>`;
   document.getElementById('ms-list').appendChild(d);
 }
 
 function addTrackerRow(){
   const n=document.querySelectorAll('#tracker-body tr').length+1;
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:10px">${String(n).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie"></td><td><input class="ie" type="date" style="font-family:var(--font-mono);font-size:10px"></td><td><select class="ie" onchange="updateTrackerStats()">${tStatusOpts(0)}</select></td><td><input class="ie"></td>`;
+  tr.innerHTML=`<td class="font-mono text-xs text-gray-400">${String(n).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie"></td><td><input class="ie font-mono text-xs" type="date"></td><td><select class="ie text-xs" onchange="updateTrackerStats()">${tStatusOpts(0)}</select></td><td><input class="ie text-gray-500"></td>`;
   document.getElementById('tracker-body').appendChild(tr); updateTrackerStats();
 }
 
@@ -492,28 +506,28 @@ function addEodItem(type){
   const inp=document.getElementById(`eod-${type}-in`); const val=inp.value.trim(); if(!val)return;
   const list=document.getElementById(`eod-${type}-list`);
   const div=document.createElement('div');
-  div.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px';
-  div.innerHTML=`<div class="chk" style="width:14px;height:14px" onclick="toggleChk(this)"><i class="ti ti-check" style="font-size:8px" aria-hidden="true"></i></div><span class="eod-txt" style="flex:1">${val}</span><i class="ti ti-x" style="font-size:11px;cursor:pointer;color:var(--text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
+  div.className='flex items-center gap-2 py-1.5 text-sm text-gray-700';
+  div.innerHTML=`<div class="chk w-4 h-4 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0 cursor-pointer" onclick="toggleChk(this)"><i class="ti ti-check text-[9px]" aria-hidden="true"></i></div><span class="eod-txt flex-1">${val}</span><i class="ti ti-x text-xs text-gray-400 cursor-pointer hover:text-gray-600" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
   list.appendChild(div); inp.value='';
 }
 
 function addEodIssue(){
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class="ie"></td><td><select class="ie">${sevOpts(2)}</select></td><td><input class="ie"></td><td><select class="ie">${iStatusOpts(0)}</select></td>`;
+  tr.innerHTML=`<td><input class="ie"></td><td><select class="ie text-xs">${sevOpts(2)}</select></td><td><input class="ie"></td><td><select class="ie text-xs">${iStatusOpts(0)}</select></td>`;
   document.getElementById('eod-issue-body').appendChild(tr);
 }
 
 function addRiskRow(){
   riskCount++;
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:10px">R${String(riskCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><select class="ie" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><span class="rl rh">9</span></td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie">${rStatusOpts(0)}</select></td>`;
+  tr.innerHTML=`<td class="font-mono text-xs text-gray-400">R${String(riskCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie text-xs"></td><td><select class="ie text-xs" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><select class="ie text-xs" onchange="calcRisk(this)"><option>H</option><option>M</option><option>L</option></select></td><td><span class="rl rh">9</span></td><td><input class="ie text-xs"></td><td><input class="ie text-xs"></td><td><select class="ie text-xs">${rStatusOpts(0)}</select></td>`;
   document.getElementById('risk-body').appendChild(tr); updateRiskBadge();
 }
 
 function addIssueRow(){
   issueCount++;
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:10px">I${String(issueCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie" type="date" value="${new Date().toISOString().slice(0,10)}" style="font-family:var(--font-mono);font-size:10px"></td><td><select class="ie">${sevOpts(2)}</select></td><td><input class="ie"></td><td><input class="ie"></td><td><input class="ie"></td><td><select class="ie">${iStatusOpts(0)}</select></td>`;
+  tr.innerHTML=`<td class="font-mono text-xs text-gray-400">I${String(issueCount).padStart(2,'0')}</td><td><input class="ie"></td><td><input class="ie font-mono text-xs text-gray-400" type="date" value="${new Date().toISOString().slice(0,10)}"></td><td><select class="ie text-xs">${sevOpts(2)}</select></td><td><input class="ie text-xs"></td><td><input class="ie text-xs"></td><td><input class="ie text-xs"></td><td><select class="ie text-xs">${iStatusOpts(0)}</select></td>`;
   document.getElementById('issue-body').appendChild(tr);
 }
 
@@ -522,7 +536,7 @@ function addRetro(type){
   const inp=document.getElementById(m[type]); const val=inp.value.trim(); if(!val)return;
   const lm={good:'retro-good',bad:'retro-bad',action:'retro-action'};
   const div=document.createElement('div'); div.className='ri';
-  div.innerHTML=`<i class="ti ti-circle-dot" style="font-size:10px;flex-shrink:0;margin-top:2px;color:var(--text-tertiary)" aria-hidden="true"></i><span style="flex:1">${val}</span><i class="ti ti-x" style="font-size:10px;cursor:pointer;color:var(--text-tertiary)" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
+  div.innerHTML=`<i class="ti ti-circle-dot text-[10px] flex-shrink-0 mt-0.5 text-gray-300" aria-hidden="true"></i><span class="flex-1">${val}</span><i class="ti ti-x text-[10px] cursor-pointer text-gray-300 hover:text-gray-500" onclick="this.parentElement.remove()" aria-hidden="true"></i>`;
   document.getElementById(lm[type]).appendChild(div); inp.value='';
 }
 
@@ -536,7 +550,7 @@ function switchTool(id,el){
 
 function renderQuickBtns(){
   const cmds=t('quick')[currentTool]||[];
-  document.getElementById('ai-qbs').innerHTML=cmds.map(c=>`<div class="ai-qb" onclick="sendAI('${c.replace(/'/g,"\\'")}">${c}</div>`).join('');
+  document.getElementById('ai-qbs').innerHTML=cmds.map(c=>`<div class="ai-qb" onclick="sendAI('${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
 }
 
 function toggleAI(){
@@ -674,7 +688,7 @@ async function sendAI(msg){
   inp.value=''; if(!aiOpen) toggleAI();
   addAIMsg('u',text);
   const ld=addAIMsg('a',lang==='zh'?'分析中…':'Thinking…');
-  ld.style.fontStyle='italic'; ld.style.color='var(--text-tertiary)';
+  ld.style.fontStyle='italic'; ld.style.color='#9ca3af';
   saveCurrent();
   const ctx={dep:currentDep,tool:currentTool,lang,data:currentDep?deps[currentDep]:{}};
   try{
@@ -729,7 +743,7 @@ function exportCSV(){
     csv='Risk,Category,Prob,Impact,Score,Mitigation\n';
     d.risks.forEach(r=>{csv+=[r.desc,r.cat,r.prob,r.impact,r.score,r.mit].map(v=>'"'+(v||'').replace(/"/g,'""')+'"').join(',')+'\n';});
   } else{alert(t('alertExport'));return;}
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));a.download=fn;a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));a.download=fn;a.click();
 }
 
 deps['DLY007']=newDepData('DLY007','LungSoon Ocean Group','PJ8','Majuro, Marshall Islands','active');
