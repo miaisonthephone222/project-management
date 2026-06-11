@@ -642,11 +642,16 @@ select.ie:focus{padding-right:20px;padding-left:0;padding-top:0;padding-bottom:0
       <div class="form-grid fg1" style="margin-bottom:8px">
         <div class="field">
           <label data-i18n="slackToken">Slack Bot Token</label>
-          <input id="slack-token-inp" type="password" data-i18n-ph="slackTokenPh" placeholder="xoxb-…">
+          <input id="slack-token-inp" type="password" placeholder="xoxb-…">
           <div id="slack-token-status" style="font-size:12px;color:var(--green);margin-top:4px"></div>
         </div>
+        <div class="field">
+          <label data-i18n="slackChannel">Slack Channel</label>
+          <input id="slack-channel-inp" placeholder="#project-management">
+          <div style="font-size:11px;color:var(--text3);margin-top:3px" data-i18n="slackChannelHint">Channel name or ID. Bot must be added to the channel first.</div>
+        </div>
       </div>
-      <p style="font-size:12px;color:var(--text3);margin:0 0 16px" data-i18n="slackTokenNote">Paste your Slack bot OAuth token. Stored locally in your browser.</p>
+      <p style="font-size:12px;color:var(--text3);margin:0 0 16px" data-i18n="slackTokenNote">Required scope: <strong>chat:write</strong>. Add the bot to the channel via <em>/invite @your-bot</em>.</p>
       <div style="display:flex;justify-content:flex-end;gap:8px">
         <button class="tbtn" onclick="hideSettings()" data-i18n="cancel">Cancel</button>
         <button class="tbtn blue" onclick="saveSlackToken()"><i class="ti ti-device-floppy" aria-hidden="true"></i> <span data-i18n="save">Save</span></button>
@@ -691,7 +696,7 @@ const T={
     send:'Send',addRow:'Add',cancel:'Cancel',create:'Create',save:'Save',viewAll:'View all',
     settingsTitle:'Settings',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
     slackTokenNote:'Paste your Slack bot OAuth token (xoxb-…). Required scope: chat:write. If missing, messages are copied to clipboard instead.',
-    slackTokenSet:'✓ Token saved',toastNoToken:'Add your Slack bot token in Settings first',
+    slackTokenSet:'✓ Saved',toastNoToken:'Add your Slack bot token in Settings first',slackChannel:'Slack Channel',slackChannelHint:'Channel name or ID. Bot must be added to the channel first (/invite @bot).',
     charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',msNotes:'Notes / required actions…',
     stakeholders:'Stakeholders',addStakeholder:'Add stakeholder',
     shName:'Name',shRole:'Role',shContact:'Contact',shNotified:'Notified',
@@ -770,7 +775,7 @@ const T={
     send:'發送',addRow:'新增',cancel:'取消',create:'建立',save:'儲存',viewAll:'查看全部',
     settingsTitle:'設定',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
     slackTokenNote:'貼上 Slack Bot OAuth Token（xoxb-…）。需要 chat:write 權限。若缺少，訊息將自動複製至剪貼簿。',
-    slackTokenSet:'✓ 已儲存',toastNoToken:'請先在設定中新增 Slack Bot Token',
+    slackTokenSet:'✓ 已儲存',toastNoToken:'請先在設定中新增 Slack Bot Token',slackChannel:'Slack 頻道',slackChannelHint:'頻道名稱或 ID。先在頻道中執行 /invite @bot 讓機器人加入。',
     charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',msNotes:'備註 / 必辦事項…',
     stakeholders:'聯絡窗口',addStakeholder:'新增窗口',
     shName:'姓名',shRole:'角色',shContact:'聯絡方式',shNotified:'已通知',
@@ -1396,7 +1401,7 @@ async function slackSend(tool){
   try{
     const res=await fetch('https://slack.com/api/chat.postMessage',{
       method:'POST',
-      body:new URLSearchParams({token,channel:SLACK_CHANNEL_ID,text:msg})
+      body:new URLSearchParams({token,channel:localStorage.getItem('valtec_slack_channel')||SLACK_CHANNEL_ID,text:msg})
     });
     const data=await res.json();
     if(data.ok){
@@ -1427,17 +1432,22 @@ function showSettings(){
 function hideSettings(){document.getElementById('settings-modal').classList.remove('show');}
 function saveSlackToken(){
   const val=document.getElementById('slack-token-inp').value.trim();
+  const ch=document.getElementById('slack-channel-inp').value.trim();
   if(val)localStorage.setItem('valtec_slack_token',val);else localStorage.removeItem('valtec_slack_token');
+  if(ch)localStorage.setItem('valtec_slack_channel',ch);else localStorage.removeItem('valtec_slack_channel');
   refreshSlackTokenUI();
   hideSettings();
   showToast(val?t('slackTokenSet'):t('cancel'));
 }
 function refreshSlackTokenUI(){
   const token=localStorage.getItem('valtec_slack_token')||'';
+  const ch=localStorage.getItem('valtec_slack_channel')||'';
   const inp=document.getElementById('slack-token-inp');
+  const chInp=document.getElementById('slack-channel-inp');
   const status=document.getElementById('slack-token-status');
   if(!inp)return;
   inp.value=token;
+  if(chInp)chInp.value=ch;
   status.textContent=token?t('slackTokenSet'):'';
 }
 
