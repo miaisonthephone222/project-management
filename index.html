@@ -42,7 +42,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13
 #app.hidden{display:none}
 
 /* ── Icon sidebar ── */
-.sb{width:52px;background:var(--navy);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;flex-shrink:0;z-index:10}
+.sb{width:52px;background:var(--navy);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;flex-shrink:0;z-index:10;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
 .sb-logo{width:34px;height:34px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:600;margin-bottom:12px;flex-shrink:0}
 .sb-btn{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);font-size:18px;cursor:pointer;transition:all .15s;position:relative;flex-shrink:0}
 .sb-btn:hover{background:rgba(255,255,255,.1);color:#fff}
@@ -50,7 +51,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13
 .sb-btn .sb-tip{position:absolute;left:48px;top:50%;transform:translateY(-50%);background:var(--text);color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100}
 .sb-btn:hover .sb-tip{opacity:1}
 .sb-sep{width:26px;height:1px;background:rgba(255,255,255,.12);margin:6px 0;flex-shrink:0}
-.sb-spacer{flex:1}
+.sb-spacer{flex:1;min-height:8px}
 
 /* ── Nav panel ── */
 .nav{width:210px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
