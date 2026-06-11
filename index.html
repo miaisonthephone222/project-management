@@ -690,7 +690,7 @@ const T={
     toolDash:'Dashboard',toolCharter:'Charter',toolTracker:'Tracker',toolEod:'EOD Report',toolRisk:'Risk Log',toolRetro:'Retrospective',
     send:'Send',addRow:'Add',cancel:'Cancel',create:'Create',save:'Save',viewAll:'View all',
     settingsTitle:'Settings',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
-    slackTokenNote:'Paste your Slack bot OAuth token (xoxb-…). Stored locally in your browser.',
+    slackTokenNote:'Paste your Slack bot OAuth token (xoxb-…). Required scope: chat:write. If missing, messages are copied to clipboard instead.',
     slackTokenSet:'✓ Token saved',toastNoToken:'Add your Slack bot token in Settings first',
     charterInfo:'Project info',milestones:'Milestones',addMs:'Add milestone',msNotes:'Notes / required actions…',
     stakeholders:'Stakeholders',addStakeholder:'Add stakeholder',
@@ -769,7 +769,7 @@ const T={
     toolDash:'總覽',toolCharter:'Charter',toolTracker:'Tracker',toolEod:'EOD 報告',toolRisk:'風險紀錄',toolRetro:'回顧',
     send:'發送',addRow:'新增',cancel:'取消',create:'建立',save:'儲存',viewAll:'查看全部',
     settingsTitle:'設定',slackToken:'Slack Bot Token',slackTokenPh:'xoxb-…',
-    slackTokenNote:'貼上 Slack Bot OAuth Token（xoxb-…），儲存於瀏覽器本地。',
+    slackTokenNote:'貼上 Slack Bot OAuth Token（xoxb-…）。需要 chat:write 權限。若缺少，訊息將自動複製至剪貼簿。',
     slackTokenSet:'✓ 已儲存',toastNoToken:'請先在設定中新增 Slack Bot Token',
     charterInfo:'專案基本資訊',milestones:'里程碑',addMs:'新增里程碑',msNotes:'備註 / 必辦事項…',
     stakeholders:'聯絡窗口',addStakeholder:'新增窗口',
@@ -1392,16 +1392,33 @@ async function slackSend(tool){
   const msg=tk==='reports'?generateReportTemplate(currentReport):buildSlackMsg(tk);
   if(!msg)return;
   const token=localStorage.getItem('valtec_slack_token');
-  if(!token){showToast(t('toastNoToken'));return;}
+  if(!token){copyToClipboardFallback(msg,lang==='zh'?'已複製至剪貼簿，請手動貼至 Slack ✓':'Copied — paste into Slack manually ✓');return;}
   try{
     const res=await fetch('https://slack.com/api/chat.postMessage',{
       method:'POST',
       body:new URLSearchParams({token,channel:SLACK_CHANNEL_ID,text:msg})
     });
     const data=await res.json();
-    if(data.ok)showToast(t('toastSent'));
-    else showToast('Slack: '+(data.error||'error'));
-  }catch(e){showToast('Send failed: '+e.message);}
+    if(data.ok){
+      showToast(t('toastSent'));
+    } else {
+      const hint=data.error==='missing_scope'
+        ? (lang==='zh'?'Bot 缺少 chat:write 權限，已複製訊息至剪貼簿':'Bot missing chat:write scope — message copied to clipboard')
+        : data.error==='not_in_channel'
+        ? (lang==='zh'?'Bot 未加入頻道，已複製至剪貼簿':'Bot not in channel — copied to clipboard')
+        : `Slack: ${data.error} — ${lang==='zh'?'已複製至剪貼簿':'copied to clipboard'}`;
+      copyToClipboardFallback(msg,hint);
+    }
+  }catch(e){copyToClipboardFallback(msg,lang==='zh'?'網路錯誤，已複製至剪貼簿':'Network error — copied to clipboard');}
+}
+function copyToClipboardFallback(text,toastMsg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>showToast(toastMsg)).catch(()=>showToast(toastMsg));
+  } else {
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    showToast(toastMsg);
+  }
 }
 function showSettings(){
   refreshSlackTokenUI();
